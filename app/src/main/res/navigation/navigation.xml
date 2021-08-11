@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation"
+    app:startDestination="@id/characterList">
+
+    <fragment
+        android:id="@+id/characterList"
+        android:name="com.github.alfabravo2013.marvelcharacters.presentation.home.CharacterList"
+        android:label="CharacterList" >
+        <action
+            android:id="@+id/action_characterList_to_characterDetails"
+            app:destination="@id/characterDetails" />
+    </fragment>
+    <fragment
+        android:id="@+id/characterDetails"
+        android:name="com.github.alfabravo2013.marvelcharacters.presentation.detail.CharacterDetails"
+        android:label="CharacterDetails" />
+</navigation>
