@@ -16,6 +16,7 @@
     <dimen name="text_large">20sp</dimen>
     <dimen name="text_xlarge">24sp</dimen>
 
+    <dimen name="elevation_zero">0dp</dimen>
     <dimen name="elevation_small">2dp</dimen>
     <dimen name="elevation_med">4dp</dimen>
     <dimen name="elevation_base">6dp</dimen>

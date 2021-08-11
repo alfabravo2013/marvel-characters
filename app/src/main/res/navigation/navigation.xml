@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/characterList"
-        android:name="com.github.alfabravo2013.marvelcharacters.presentation.home.CharacterList"
+        android:name="com.github.alfabravo2013.marvelcharacters.presentation.home.CharacterListFragment"
         android:label="CharacterList" >
         <action
             android:id="@+id/action_characterList_to_characterDetails"
