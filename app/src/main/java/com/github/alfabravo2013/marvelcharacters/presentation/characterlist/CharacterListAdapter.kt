@@ -1,11 +1,11 @@
-package com.github.alfabravo2013.marvelcharacters.presentation.home
+package com.github.alfabravo2013.marvelcharacters.presentation.characterlist
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.github.alfabravo2013.marvelcharacters.databinding.CharacterListItemBinding
-import com.github.alfabravo2013.marvelcharacters.presentation.models.CharacterListItem
+import com.github.alfabravo2013.marvelcharacters.presentation.characterlist.model.CharacterListItem
 
 class CharacterListAdapter : RecyclerView.Adapter<CharacterListAdapter.ViewHolder>() {
     private val characterList: MutableList<CharacterListItem> = mutableListOf(

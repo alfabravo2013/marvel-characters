@@ -1,4 +1,4 @@
-package com.github.alfabravo2013.marvelcharacters.presentation.home
+package com.github.alfabravo2013.marvelcharacters.presentation.characterlist
 
 import android.os.Bundle
 import android.view.LayoutInflater

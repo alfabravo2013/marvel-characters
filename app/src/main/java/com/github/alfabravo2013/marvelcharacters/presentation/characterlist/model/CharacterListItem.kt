@@ -1,4 +1,4 @@
-package com.github.alfabravo2013.marvelcharacters.presentation.models
+package com.github.alfabravo2013.marvelcharacters.presentation.characterlist.model
 
 data class CharacterListItem(
     val id: Int,
