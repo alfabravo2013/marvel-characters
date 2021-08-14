@@ -6,8 +6,6 @@ fun MarvelCharacter.toCharacterListItem(): CharacterListItem {
     return CharacterListItem(
         id = id,
         name = name,
-        imageUrl = thumbnail.toImageUrl()
+        imageUrl = thumbnail.toString()
     )
 }
-
-fun ImageUrl.toImageUrl(): String = "$path.$extension"

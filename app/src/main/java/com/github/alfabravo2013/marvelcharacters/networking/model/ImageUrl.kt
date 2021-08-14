@@ -6,4 +6,6 @@ import kotlinx.serialization.Serializable
 data class ImageUrl(
     val path: String,
     val extension: String
-)
+) {
+    override fun toString(): String = "$path.$extension"
+}
