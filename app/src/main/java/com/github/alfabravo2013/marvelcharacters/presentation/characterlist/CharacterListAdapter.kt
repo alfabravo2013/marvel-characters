@@ -7,39 +7,10 @@ import com.bumptech.glide.Glide
 import com.github.alfabravo2013.marvelcharacters.databinding.CharacterListItemBinding
 import com.github.alfabravo2013.marvelcharacters.presentation.characterlist.model.CharacterListItem
 
-class CharacterListAdapter : RecyclerView.Adapter<CharacterListAdapter.ViewHolder>() {
-    private val characterList: MutableList<CharacterListItem> = mutableListOf(
-        CharacterListItem(
-            id = 1,
-            name = "3-D Man",
-            imageUrl = "http://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg"
-        ),
-        CharacterListItem(
-            id = 2,
-            name = "A-Bomb (HAS)",
-            imageUrl = "http://i.annihil.us/u/prod/marvel/i/mg/3/20/5232158de5b16.jpg"
-        ),
-        CharacterListItem(
-            id = 1,
-            name = "3-D Man",
-            imageUrl = "http://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg"
-        ),
-        CharacterListItem(
-            id = 2,
-            name = "A-Bomb (HAS)",
-            imageUrl = "http://i.annihil.us/u/prod/marvel/i/mg/3/20/5232158de5b16.jpg"
-        ),
-        CharacterListItem(
-            id = 1,
-            name = "3-D Man",
-            imageUrl = "http://i.annihil.us/u/prod/marvel/i/mg/c/e0/535fecbbb9784.jpg"
-        ),
-        CharacterListItem(
-            id = 2,
-            name = "A-Bomb (HAS)",
-            imageUrl = "http://i.annihil.us/u/prod/marvel/i/mg/3/20/5232158de5b16.jpg"
-        )
-    )
+class CharacterListAdapter(
+    private val onEndOfList: () -> Unit
+) : RecyclerView.Adapter<CharacterListAdapter.ViewHolder>() {
+    private val characterList: MutableList<CharacterListItem> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = CharacterListItemBinding
@@ -49,6 +20,9 @@ class CharacterListAdapter : RecyclerView.Adapter<CharacterListAdapter.ViewHolde
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(characterList[position])
+        if (position == characterList.lastIndex) {
+            onEndOfList.invoke()
+        }
     }
 
     override fun getItemCount(): Int = characterList.size
