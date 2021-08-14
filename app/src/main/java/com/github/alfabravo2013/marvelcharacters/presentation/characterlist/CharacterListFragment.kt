@@ -1,4 +1,4 @@
-package com.github.alfabravo2013.marvelcharacters.presentation.home
+package com.github.alfabravo2013.marvelcharacters.presentation.characterlist
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,11 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
-import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.databinding.FragmentCharacterListBinding
 
-class CharacterList : Fragment() {
+class CharacterListFragment : Fragment() {
     val viewModel: CharacterListViewModel by viewModels()
 
     private var _binding: FragmentCharacterListBinding? = null
@@ -26,9 +24,8 @@ class CharacterList : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding.navButton.setOnClickListener {
-            findNavController().navigate(R.id.action_characterList_to_characterDetails)
-        }
+        val adapter = CharacterListAdapter()
+        binding.characterListRecyclerView.adapter = adapter
     }
 
     override fun onDestroyView() {
