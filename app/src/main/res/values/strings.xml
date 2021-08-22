@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MarvelCharacters</string>
+
+<!--    Characters screen-->
+    <string name="characters_load_state_error_text">Failed to load characters.</string>
+    <string name="retry_button_text">Retry</string>
 </resources>
