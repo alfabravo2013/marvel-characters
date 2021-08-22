@@ -7,12 +7,8 @@ import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacte
 class CharactersPagingSource(
     private val remoteDataSource: CharactersRemoteDataSource
 ) : PagingSource<Int, MarvelCharacter>() {
-    override fun getRefreshKey(state: PagingState<Int, MarvelCharacter>): Int? {
-        return state.anchorPosition
-    }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, MarvelCharacter> {
-
         return try {
             val offset = params.key ?: 0
             val response = remoteDataSource.getCharacters(offset, params.loadSize)
@@ -33,5 +29,9 @@ class CharactersPagingSource(
         } catch (ex: Exception) {
             LoadResult.Error(ex)
         }
+    }
+
+    override fun getRefreshKey(state: PagingState<Int, MarvelCharacter>): Int? {
+        return state.anchorPosition
     }
 }

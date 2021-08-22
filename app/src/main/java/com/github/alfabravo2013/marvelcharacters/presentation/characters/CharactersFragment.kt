@@ -41,7 +41,6 @@ class CharactersFragment : Fragment() {
     private fun setupRecyclerView() {
         val layoutManager = GridLayoutManager(requireContext(), getSpanCount())
         val footerAdapter = CharactersLoadStateAdapter { adapter.retry() }
-
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return if (position == adapter.itemCount && footerAdapter.itemCount > 0) {

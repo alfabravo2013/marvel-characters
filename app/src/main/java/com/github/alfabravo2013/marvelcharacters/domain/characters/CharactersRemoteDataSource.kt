@@ -24,7 +24,6 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
 
         updateTotal(response.body() ?: EMPTY_OBJECT)
         return results
-
     }
 
     private fun getMavenCharacters(body: String): List<MarvelCharacter> {

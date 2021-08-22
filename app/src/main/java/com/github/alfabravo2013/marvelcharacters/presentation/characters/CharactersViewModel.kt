@@ -8,7 +8,6 @@ import com.github.alfabravo2013.marvelcharacters.domain.characters.CharactersUse
 class CharactersViewModel(
     private val charactersUseCase: CharactersUseCase
 ) : ViewModel() {
-
     private val pageSize = 20
 
     val characters = charactersUseCase.getCharactersPage(pageSize).cachedIn(viewModelScope)

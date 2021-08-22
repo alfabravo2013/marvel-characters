@@ -9,10 +9,10 @@ import androidx.fragment.app.viewModels
 import com.github.alfabravo2013.marvelcharacters.databinding.FragmentDetailBinding
 
 class Detail : Fragment() {
-    val viewModel: DetailViewModel by viewModels()
-
     private var _binding: FragmentDetailBinding? = null
     private val binding: FragmentDetailBinding get() = _binding!!
+
+    val viewModel: DetailViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,

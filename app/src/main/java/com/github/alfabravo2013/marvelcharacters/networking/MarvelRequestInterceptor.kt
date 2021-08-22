@@ -11,12 +11,11 @@ class MarvelRequestInterceptor : Interceptor {
         val originalRequest = chain.request()
 
         val ts = System.currentTimeMillis().toString()
-        val apikey: String = BuildConfig.PUBLIC_API_KEY
         val accessString = "$ts${BuildConfig.PRIVATE_API_KEY}${BuildConfig.PUBLIC_API_KEY}"
 
         val httpUrl = originalRequest.url().newBuilder()
             .addQueryParameter("ts", ts)
-            .addQueryParameter("apikey", apikey)
+            .addQueryParameter("apikey", BuildConfig.PUBLIC_API_KEY)
             .addQueryParameter("hash", accessString.toMD5Hash())
             .build()
 
