@@ -1,12 +1,10 @@
 package com.github.alfabravo2013.marvelcharacters.domain.characters
 
-import androidx.lifecycle.LiveData
-import androidx.paging.PagingData
-import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharacterItemPage
 
 class CharactersUseCase(private val charactersRepository: CharactersRepository) {
 
-    fun getCharactersPage(pageSize: Int): LiveData<PagingData<CharactersItem>> {
+    suspend fun getAllCharacters(pageSize: Int): CharacterItemPage {
         return charactersRepository.getCharactersPage(pageSize)
     }
 }

@@ -2,11 +2,15 @@ package com.github.alfabravo2013.marvelcharacters.di
 
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelRequestInterceptor
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import org.koin.dsl.module
 import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
 
+@ExperimentalSerializationApi
 val marvelApiModule = module {
 
     single<OkHttpClient> {
@@ -16,10 +20,13 @@ val marvelApiModule = module {
     }
 
     single<Retrofit> {
+        val contentType = MediaType.get("application/json")
+        val json = Json { ignoreUnknownKeys = true }
+
         Retrofit.Builder()
             .baseUrl("https://gateway.marvel.com/")
             .client(get())
-            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(json.asConverterFactory(contentType))
             .build()
     }
 

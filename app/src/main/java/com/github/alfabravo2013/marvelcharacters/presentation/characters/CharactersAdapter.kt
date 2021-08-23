@@ -2,16 +2,17 @@ package com.github.alfabravo2013.marvelcharacters.presentation.characters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.github.alfabravo2013.marvelcharacters.databinding.CharactersItemBinding
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
 
-class CharacterListAdapter :
-    PagingDataAdapter<CharactersItem, CharacterListAdapter.ViewHolder>(CharacterComparator()) {
+class CharacterListAdapter(
+    private val onListEnd: () -> Unit
+) : RecyclerView.Adapter<CharacterListAdapter.ViewHolder>() {
+
+    private val characters = mutableListOf<CharactersItem>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = CharactersItemBinding.inflate(
@@ -23,8 +24,18 @@ class CharacterListAdapter :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = getItem(position) ?: return
-        holder.bind(item)
+        holder.bind(characters[position])
+        if (position >= itemCount - 4) {
+            onListEnd()
+        }
+    }
+
+    override fun getItemCount(): Int = characters.size
+
+    fun addList(list: List<CharactersItem>) {
+        val startPosition = characters.size
+        characters.addAll(list)
+        notifyItemRangeInserted(startPosition, list.size)
     }
 
     class ViewHolder(
@@ -38,16 +49,6 @@ class CharacterListAdapter :
                 .centerCrop()
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(binding.charactersThumbnail)
-        }
-    }
-
-    class CharacterComparator : DiffUtil.ItemCallback<CharactersItem>() {
-        override fun areItemsTheSame(oldItem: CharactersItem, newItem: CharactersItem): Boolean {
-            return oldItem.id == newItem.id
-        }
-
-        override fun areContentsTheSame(oldItem: CharactersItem, newItem: CharactersItem): Boolean {
-            return oldItem == newItem
         }
     }
 }
