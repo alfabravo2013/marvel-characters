@@ -2,6 +2,7 @@ package com.github.alfabravo2013.marvelcharacters.di
 
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelRequestInterceptor
+import com.github.alfabravo2013.marvelcharacters.utils.BASE_URL
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -24,7 +25,7 @@ val marvelApiModule = module {
         val json = Json { ignoreUnknownKeys = true }
 
         Retrofit.Builder()
-            .baseUrl("https://gateway.marvel.com/")
+            .baseUrl(BASE_URL)
             .client(get())
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()

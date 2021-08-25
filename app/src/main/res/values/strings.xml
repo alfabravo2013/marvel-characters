@@ -8,5 +8,5 @@
 <!--    API errors -->
     <string name="character_not_found">Character not found</string>
     <string name="page_not_found">Cannot load characters</string>
-    <string name="unknown_error">An error occurred in the process, please try again</string>
+    <string name="unknown_error">An error occurred, please try again</string>
 </resources>

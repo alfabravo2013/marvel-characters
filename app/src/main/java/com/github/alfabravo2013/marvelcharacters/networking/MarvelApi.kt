@@ -1,12 +1,11 @@
 package com.github.alfabravo2013.marvelcharacters.networking
 
 import com.github.alfabravo2013.marvelcharacters.networking.model.CharacterDataWrapper
+import com.github.alfabravo2013.marvelcharacters.utils.CHARACTERS_ID_ENDPOINT
+import com.github.alfabravo2013.marvelcharacters.utils.CHARACTERS_PAGE_ENDPOINT
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
-
-private const val CHARACTERS_PAGE_ENDPOINT = "v1/public/characters"
-private const val CHARACTERS_ID_ENDPOINT = "v1/public/characters/{characterId}"
 
 interface MarvelApi {
 

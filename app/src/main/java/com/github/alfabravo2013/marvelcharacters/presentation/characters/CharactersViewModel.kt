@@ -26,7 +26,7 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
 
         runCatching {
             withContext(Dispatchers.IO) {
-                charactersUseCase.getAllCharacters(20)
+                charactersUseCase.getCharactersPage(20)
             }
         }.onSuccess { characters ->
             _onEvent.value = OnEvent.SubmitData(characters)

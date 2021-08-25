@@ -1,8 +1,6 @@
 package com.github.alfabravo2013.marvelcharacters.mappers
 
-import com.github.alfabravo2013.marvelcharacters.domain.model.MarvelCharacterPage
 import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
-import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharacterItemPage
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.Detail
 import java.math.BigInteger
@@ -16,13 +14,6 @@ fun MarvelCharacter.toCharacterListItem(): CharactersItem {
     )
 }
 
-fun MarvelCharacterPage.toCharacterItemPage(): CharacterItemPage {
-    return CharacterItemPage(
-        error = error,
-        characters = characters.map { marvelCharacter -> marvelCharacter.toCharacterListItem() }
-    )
-}
-
 fun MarvelCharacter.toDetail(): Detail {
     return Detail(
         name = name,
@@ -33,23 +24,6 @@ fun MarvelCharacter.toDetail(): Detail {
         },
         imageUrl = thumbnail.toString()
     )
-}
-
-fun MarvelCharacterPage.toDetail(): Detail {
-    return if (error.isNotEmpty()) {
-        Detail(error = error)
-    } else {
-        val character = characters.first()
-        Detail(
-            name = character.name,
-            description = if (character.description.isEmpty()) {
-                "Description not available"
-            } else {
-                character.description
-            },
-            imageUrl = character.thumbnail.toString()
-        )
-    }
 }
 
 fun String.toMD5Hash(): String {
