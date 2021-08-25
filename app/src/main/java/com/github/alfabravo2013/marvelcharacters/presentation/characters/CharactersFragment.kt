@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.github.alfabravo2013.marvelcharacters.databinding.FragmentCharactersBinding
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.OnEvent
@@ -14,7 +15,13 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CharactersFragment : Fragment() {
     private val viewModel: CharactersViewModel by viewModel()
-    private val adapter by lazy { CharacterListAdapter { viewModel.onGetCharactersPage() } }
+
+    private val adapter by lazy {
+        CharacterListAdapter(
+            { viewModel.getCharactersPage() },
+            { id -> navigateToDetail(id) }
+        )
+    }
 
     private var _binding: FragmentCharactersBinding? = null
     private val binding: FragmentCharactersBinding get() = _binding!!
@@ -42,7 +49,7 @@ class CharactersFragment : Fragment() {
 
         binding.charactersRetryButton.setOnClickListener {
             it.visibility = View.GONE
-            viewModel.onGetCharactersPage()
+            viewModel.getCharactersPage()
         }
 
         viewModel.onEvent.observe(viewLifecycleOwner, observer)
@@ -67,5 +74,10 @@ class CharactersFragment : Fragment() {
     private fun showError(error: String) {
         Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         binding.charactersRetryButton.visibility = View.VISIBLE
+    }
+
+    private fun navigateToDetail(characterId: Int) {
+        val action = CharactersFragmentDirections.actionCharactersToDetail(characterId)
+        findNavController().navigate(action)
     }
 }

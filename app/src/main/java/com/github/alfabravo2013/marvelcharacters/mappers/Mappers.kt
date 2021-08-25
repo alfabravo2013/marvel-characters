@@ -4,6 +4,7 @@ import com.github.alfabravo2013.marvelcharacters.domain.model.MarvelCharacterPag
 import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharacterItemPage
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.Detail
 import java.math.BigInteger
 import java.security.MessageDigest
 
@@ -20,6 +21,23 @@ fun MarvelCharacterPage.toCharacterItemPage(): CharacterItemPage {
         error = error,
         characters = characters.map { marvelCharacter -> marvelCharacter.toCharacterListItem() }
     )
+}
+
+fun MarvelCharacterPage.toDetail(): Detail {
+    return if (error.isNotEmpty()) {
+        Detail(error = error)
+    } else {
+        val character = characters.first()
+        Detail(
+            name = character.name,
+            description = if (character.description.isEmpty()) {
+                "Description not available"
+            } else {
+                character.description
+            },
+            imageUrl = character.thumbnail.toString()
+        )
+    }
 }
 
 fun String.toMD5Hash(): String {

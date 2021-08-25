@@ -8,4 +8,8 @@
         <item name="android:textColor">@color/white</item>
         <item name="android:background">@color/red_transparent</item>
     </style>
+    <style name="CharacterDescriptionText">
+        <item name="android:textSize">@dimen/text_large</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
 </resources>
