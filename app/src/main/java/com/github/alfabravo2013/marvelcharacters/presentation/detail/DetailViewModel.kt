@@ -21,9 +21,10 @@ class DetailViewModel(
         _onEvent.value = OnEvent.ShowLoading
 
         runCatching {
-            val detail = withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
                 detailUseCase.getCharacterById(characterId)
             }
+        }.onSuccess { detail ->
             _onEvent.value = OnEvent.ShowDetail(detail)
         }.onFailure { error ->
             showError(error)

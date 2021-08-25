@@ -25,9 +25,10 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         _onEvent.value = OnEvent.ShowLoading
 
         runCatching {
-            val characters = withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO) {
                 charactersUseCase.getAllCharacters(20)
             }
+        }.onSuccess { characters ->
             _onEvent.value = OnEvent.SubmitData(characters)
         }.onFailure { error ->
             showError(error)
