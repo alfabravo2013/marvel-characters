@@ -16,29 +16,28 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     private val _onEvent = SingleLiveEvent<OnEvent>()
     val onEvent: SingleLiveEvent<OnEvent> get() = _onEvent
 
-    fun getCharactersPage() {
+    fun getCharactersPage() = viewModelScope.launch {
         if (isLoading) {
-            return
+            return@launch
         }
 
-        viewModelScope.launch {
-            isLoading = true
-            _onEvent.value = OnEvent.ShowLoading
+        isLoading = true
+        _onEvent.value = OnEvent.ShowLoading
 
-            try {
-                val characters = withContext(Dispatchers.IO) {
-                    charactersUseCase.getAllCharacters(20)
-                }
-                _onEvent.value = OnEvent.SubmitData(characters)
-            } catch (ex: Exception) {
-                showError(ex)
+        runCatching {
+            val characters = withContext(Dispatchers.IO) {
+                charactersUseCase.getAllCharacters(20)
             }
-            _onEvent.value = OnEvent.HideLoading
-            isLoading = false
+            _onEvent.value = OnEvent.SubmitData(characters)
+        }.onFailure { error ->
+            showError(error)
         }
+
+        _onEvent.value = OnEvent.HideLoading
+        isLoading = false
     }
 
-    private fun showError(ex: Exception) {
+    private fun showError(ex: Throwable) {
         when (ex) {
             is IllegalArgumentException -> _onEvent.value =
                 OnEvent.ShowError(R.string.page_not_found)

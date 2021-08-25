@@ -17,24 +17,22 @@ class DetailViewModel(
     private val _onEvent = SingleLiveEvent<OnEvent>()
     val onEvent: SingleLiveEvent<OnEvent> get() = _onEvent
 
-    fun getDetail(characterId: Int) {
-        viewModelScope.launch {
-            _onEvent.value = OnEvent.ShowLoading
+    fun getDetail(characterId: Int) = viewModelScope.launch {
+        _onEvent.value = OnEvent.ShowLoading
 
-            try {
-                val detail = withContext(Dispatchers.IO) {
-                    detailUseCase.getCharacterById(characterId)
-                }
-                _onEvent.value = OnEvent.ShowDetail(detail)
-            } catch (ex: Exception) {
-                showError(ex)
+        runCatching {
+            val detail = withContext(Dispatchers.IO) {
+                detailUseCase.getCharacterById(characterId)
             }
-
-            _onEvent.value = OnEvent.HideLoading
+            _onEvent.value = OnEvent.ShowDetail(detail)
+        }.onFailure { error ->
+            showError(error)
         }
+
+        _onEvent.value = OnEvent.HideLoading
     }
 
-    private fun showError(ex: Exception) {
+    private fun showError(ex: Throwable) {
         when (ex) {
             is IllegalArgumentException -> _onEvent.value =
                 OnEvent.Error(R.string.character_not_found)
