@@ -24,7 +24,10 @@ class DetailFragment : Fragment() {
         when (event) {
             is OnEvent.ShowLoading -> binding.detailProgressBar.visibility = View.VISIBLE
             is OnEvent.HideLoading -> binding.detailProgressBar.visibility = View.GONE
-            is OnEvent.Error -> Toast.makeText(activity, event.error, Toast.LENGTH_LONG).show()
+            is OnEvent.Error -> Toast.makeText(
+                activity,
+                getString(event.errorId),
+                Toast.LENGTH_LONG).show()
             is OnEvent.ShowDetail -> bindElements(event.detail)
         }
     }

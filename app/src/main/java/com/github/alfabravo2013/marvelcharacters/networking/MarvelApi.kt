@@ -5,15 +5,18 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+private const val CHARACTERS_PAGE_ENDPOINT = "v1/public/characters"
+private const val CHARACTERS_ID_ENDPOINT = "v1/public/characters/{characterId}"
+
 interface MarvelApi {
 
-    @GET("v1/public/characters")
+    @GET(CHARACTERS_PAGE_ENDPOINT)
     suspend fun getCharactersPage(
         @Query("offset") offset: Int,
         @Query("limit") limit: Int
     ): CharacterDataWrapper
 
-    @GET("v1/public/characters/{characterId}")
+    @GET(CHARACTERS_ID_ENDPOINT)
     suspend fun getCharacterById(
         @Path("characterId") characterId: Int
     ): CharacterDataWrapper

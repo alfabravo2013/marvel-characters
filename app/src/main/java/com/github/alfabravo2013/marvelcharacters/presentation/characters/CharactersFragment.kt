@@ -30,7 +30,7 @@ class CharactersFragment : Fragment() {
         when (event) {
             is OnEvent.ShowLoading -> binding.charactersProgressBar.visibility = View.VISIBLE
             is OnEvent.HideLoading -> binding.charactersProgressBar.visibility = View.GONE
-            is OnEvent.ShowError -> showError(event.error)
+            is OnEvent.ShowError -> showError(event.errorId)
             is OnEvent.SubmitData -> adapter.addList(event.data)
         }
     }
@@ -71,8 +71,8 @@ class CharactersFragment : Fragment() {
         return (viewportWidthDp / 200).coerceIn(1..5)
     }
 
-    private fun showError(error: String) {
-        Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+    private fun showError(errorId: Int) {
+        Toast.makeText(activity, getString(errorId), Toast.LENGTH_SHORT).show()
         binding.charactersRetryButton.visibility = View.VISIBLE
     }
 

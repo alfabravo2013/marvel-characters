@@ -23,6 +23,18 @@ fun MarvelCharacterPage.toCharacterItemPage(): CharacterItemPage {
     )
 }
 
+fun MarvelCharacter.toDetail(): Detail {
+    return Detail(
+        name = name,
+        description = if (description.isEmpty()) {
+            "Description not available"
+        } else {
+            description
+        },
+        imageUrl = thumbnail.toString()
+    )
+}
+
 fun MarvelCharacterPage.toDetail(): Detail {
     return if (error.isNotEmpty()) {
         Detail(error = error)

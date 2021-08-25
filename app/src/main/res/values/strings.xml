@@ -1,7 +1,12 @@
 <resources>
     <string name="app_name">MarvelCharacters</string>
 
-<!--    Characters screen-->
+<!--    Characters screen -->
     <string name="characters_load_state_error_text">Failed to load characters.</string>
     <string name="retry_button_text">Retry</string>
+
+<!--    API errors -->
+    <string name="character_not_found">Character not found</string>
+    <string name="page_not_found">Cannot load characters</string>
+    <string name="unknown_error">An error occurred in the process, please try again</string>
 </resources>
