@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.domain.characters.CharactersUseCase
+import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
 import com.github.alfabravo2013.marvelcharacters.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +41,7 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
 
     private fun showError(ex: Throwable) {
         when (ex) {
-            is IllegalArgumentException -> _onEvent.value =
+            is MarvelApi.BadRequestException -> _onEvent.value =
                 OnEvent.ShowError(R.string.page_not_found)
             else -> _onEvent.value = OnEvent.ShowError(R.string.unknown_error)
         }

@@ -13,13 +13,14 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
                 limit = pageSize
             )
 
-            if (response.code != 200) {
-                throw IllegalArgumentException(response.code.toString())
+            when(response.code) {
+                200 -> {
+                    total = response.data.total
+                    currentOffset += pageSize
+                    return response.data.results
+                }
+                409 -> throw MarvelApi.BadRequestException()
+                else -> throw MarvelApi.ApiException()
             }
-
-            total = response.data.total
-            currentOffset += pageSize
-
-            return response.data.results
     }
 }

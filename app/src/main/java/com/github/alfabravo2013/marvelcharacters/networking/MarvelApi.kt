@@ -19,4 +19,8 @@ interface MarvelApi {
     suspend fun getCharacterById(
         @Path("characterId") characterId: Int
     ): CharacterDataWrapper
+
+    class NotFoundException : RuntimeException()
+    class BadRequestException : RuntimeException()
+    class ApiException : RuntimeException()
 }

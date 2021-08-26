@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.domain.detail.DetailUseCase
+import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.Detail
 import com.github.alfabravo2013.marvelcharacters.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,7 @@ class DetailViewModel(
 
     private fun showError(ex: Throwable) {
         when (ex) {
-            is IllegalArgumentException -> _onEvent.value =
+            is MarvelApi.NotFoundException -> _onEvent.value =
                 OnEvent.Error(R.string.character_not_found)
             else -> _onEvent.value = OnEvent.Error(R.string.unknown_error)
         }
