@@ -1,6 +1,7 @@
 # marvel-characters
 Marvel API app
 
-<p align="center">
+<span align="center">
 <img src="/preview/Screenshot_1.png" />
-</p>
+<img src="/preview/Screenshot_2.png" />
+</span>
