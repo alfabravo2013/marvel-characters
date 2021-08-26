@@ -1,30 +1,26 @@
 package com.github.alfabravo2013.marvelcharacters.domain.characters
 
-import com.github.alfabravo2013.marvelcharacters.domain.model.MarvelCharacterPage
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
+import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
 
 class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
     private var currentOffset = 0
     private var total = Int.MAX_VALUE
 
-    suspend fun getCharactersPage(pageSize: Int): MarvelCharacterPage {
-        try {
+    suspend fun getCharactersPage(pageSize: Int): List<MarvelCharacter> {
             val response = marvelApi.getCharactersPage(
                 offset = currentOffset,
                 limit = pageSize
             )
 
-            if (response.code != 200) {
-                return MarvelCharacterPage(error = response.status)
+            when(response.code) {
+                200 -> {
+                    total = response.data.total
+                    currentOffset += pageSize
+                    return response.data.results
+                }
+                409 -> throw MarvelApi.BadRequestException()
+                else -> throw MarvelApi.ApiException()
             }
-
-            total = response.data.total
-            currentOffset += pageSize
-
-            return MarvelCharacterPage(characters = response.data.results)
-
-        } catch (ex: Exception) {
-            return MarvelCharacterPage(error = ex.message ?: "unknown error")
-        }
     }
 }

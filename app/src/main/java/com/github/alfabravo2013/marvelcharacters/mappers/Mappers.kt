@@ -1,9 +1,8 @@
 package com.github.alfabravo2013.marvelcharacters.mappers
 
-import com.github.alfabravo2013.marvelcharacters.domain.model.MarvelCharacterPage
 import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
-import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharacterItemPage
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.Detail
 import java.math.BigInteger
 import java.security.MessageDigest
 
@@ -15,10 +14,15 @@ fun MarvelCharacter.toCharacterListItem(): CharactersItem {
     )
 }
 
-fun MarvelCharacterPage.toCharacterItemPage(): CharacterItemPage {
-    return CharacterItemPage(
-        error = error,
-        characters = characters.map { marvelCharacter -> marvelCharacter.toCharacterListItem() }
+fun MarvelCharacter.toDetail(): Detail {
+    return Detail(
+        name = name,
+        description = if (description.isEmpty()) {
+            "Description not available"
+        } else {
+            description
+        },
+        imageUrl = thumbnail.toString()
     )
 }
 

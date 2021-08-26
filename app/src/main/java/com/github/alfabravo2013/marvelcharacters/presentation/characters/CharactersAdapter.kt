@@ -9,10 +9,17 @@ import com.github.alfabravo2013.marvelcharacters.databinding.CharactersItemBindi
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
 
 class CharacterListAdapter(
-    private val onListEnd: () -> Unit
+    private val onListEnd: () -> Unit,
+    private val onItemClicked: (Int) -> Unit
 ) : RecyclerView.Adapter<CharacterListAdapter.ViewHolder>() {
 
     private val characters = mutableListOf<CharactersItem>()
+
+    init {
+        if (characters.isEmpty()) {
+            onListEnd()
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = CharactersItemBinding.inflate(
@@ -38,9 +45,16 @@ class CharacterListAdapter(
         notifyItemRangeInserted(startPosition, list.size)
     }
 
-    class ViewHolder(
+    inner class ViewHolder(
         private val binding: CharactersItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.root.setOnClickListener {
+                val id = characters[bindingAdapterPosition].id
+                onItemClicked(id)
+            }
+        }
 
         fun bind(item: CharactersItem) {
             binding.charactersName.text = item.name
