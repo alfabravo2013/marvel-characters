@@ -11,4 +11,7 @@
     <string name="unknown_error">An error occurred, please try again</string>
     <string name="search">Search</string>
     <string name="characters_search_query_hint_text">Type the character name</string>
+    <string name="filter_unique">Unique names</string>
+    <string name="filter_with_images">With images</string>
+    <string name="filter_with_descriptions">With descriptions</string>
 </resources>

@@ -25,24 +25,28 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         return charactersUseCase.updateQueryText(text)
     }
 
-    fun getQueriedPage() {
+    fun onToggleWithImageFilter(isChecked: Boolean) {
+        if (isChecked) {
+            charactersUseCase.addWithImageFilter()
+        } else {
+            charactersUseCase.removeWithImageFilter()
+        }
+    }
+
+    fun onToggleWithDescriptionFilter(isChecked: Boolean) {
+        if (isChecked) {
+            charactersUseCase.addWithDescriptionFilter()
+        } else {
+            charactersUseCase.removeWithDescriptionFilter()
+        }
+    }
+
+    fun getFirstPage() {
         _onEvent.value = OnEvent.CleanList
         getCharactersPage(DIRECTION.CURRENT)
     }
 
-    fun getFirstPage() {
-        getCharactersPage(DIRECTION.CURRENT)
-    }
-
-    fun getNextPage() {
-        getCharactersPage(DIRECTION.NEXT)
-    }
-
-    fun getPrevPage() {
-        getCharactersPage(DIRECTION.PREVIOUS)
-    }
-
-    private fun getCharactersPage(direction: DIRECTION) = viewModelScope.launch {
+    fun getCharactersPage(direction: DIRECTION) = viewModelScope.launch {
         if (isLoading) {
             return@launch
         }
@@ -53,9 +57,9 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         runCatching {
             withContext(Dispatchers.IO) {
                 when (direction) {
-                    DIRECTION.NEXT -> charactersUseCase.getNextPage(20)
-                    DIRECTION.CURRENT -> charactersUseCase.getFirstPage(20)
-                    DIRECTION.PREVIOUS -> charactersUseCase.getPrevPage(20)
+                    DIRECTION.NEXT -> charactersUseCase.getNextPage()
+                    DIRECTION.CURRENT -> charactersUseCase.getFirstPage()
+                    DIRECTION.PREVIOUS -> charactersUseCase.getPrevPage()
                 }
             }
         }.onSuccess { page ->
@@ -89,5 +93,5 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         data class PrevPage(val data: CharactersItemPage) : OnEvent()
     }
 
-    private enum class DIRECTION { NEXT, CURRENT, PREVIOUS }
+    enum class DIRECTION { NEXT, CURRENT, PREVIOUS }
 }

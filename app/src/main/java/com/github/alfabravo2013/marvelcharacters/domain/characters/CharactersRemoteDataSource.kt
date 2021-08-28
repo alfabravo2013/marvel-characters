@@ -2,10 +2,10 @@ package com.github.alfabravo2013.marvelcharacters.domain.characters
 
 import com.github.alfabravo2013.marvelcharacters.domain.characters.models.MarvelCharacterPage
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
+import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
+import com.github.alfabravo2013.marvelcharacters.utils.MAX_PAGE_SIZE
 
 class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
-    private val maxPageSize = 100
-
     private var queryText = ""
 
     private var currentOffset = 0
@@ -31,13 +31,13 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
         val response = if (queryText.isNotBlank()) {
             marvelApi.getCharactersPage(
                 offset = offset,
-                limit = pageSize.coerceIn(1..maxPageSize),
+                limit = pageSize.coerceIn(1..MAX_PAGE_SIZE),
                 name = queryText
             )
         } else {
             marvelApi.getCharactersPage(
                 offset = offset,
-                limit = pageSize.coerceIn(1..maxPageSize)
+                limit = pageSize.coerceIn(1..MAX_PAGE_SIZE)
             )
         }
 
@@ -50,7 +50,7 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
                     prevOffset = if (currentOffset == 0) {
                         null
                     } else (currentOffset - pageSize).coerceAtLeast(0),
-                    nextOffset = if (response.data.results.size < pageSize) {
+                    nextOffset = if (response.data.count < pageSize) {
                         null
                     } else {
                         currentOffset + pageSize

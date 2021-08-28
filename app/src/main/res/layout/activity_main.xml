@@ -8,14 +8,13 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/activity_main_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        style="@style/Widget.MaterialComponents.Toolbar.Primary"
         android:layout_gravity="center"
-        android:background="@color/red"
-        android:elevation="@dimen/elevation_base"
-        app:titleTextColor="@color/white" />
+        android:elevation="@dimen/elevation_base" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host"

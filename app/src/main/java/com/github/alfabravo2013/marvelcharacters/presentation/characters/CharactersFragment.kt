@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.databinding.FragmentCharactersBinding
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.OnEvent
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.DIRECTION
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CharactersFragment : Fragment() {
@@ -23,8 +24,8 @@ class CharactersFragment : Fragment() {
 
     private val adapter by lazy {
         CharacterListAdapter(
-            onStartReached = { viewModel.getPrevPage() },
-            onEndReached = { viewModel.getNextPage() },
+            onStartReached = { viewModel.getCharactersPage(DIRECTION.PREVIOUS) },
+            onEndReached = { viewModel.getCharactersPage(DIRECTION.NEXT) },
             onItemClicked = { id -> navigateToDetail(id) }
         ).apply { setHasStableIds(true) }
     }
@@ -57,7 +58,7 @@ class CharactersFragment : Fragment() {
 
         binding.charactersRetryButton.setOnClickListener {
             it.visibility = View.GONE
-            viewModel.getNextPage()
+            viewModel.getFirstPage()
         }
 
         viewModel.onEvent.observe(viewLifecycleOwner, observer)
@@ -68,19 +69,6 @@ class CharactersFragment : Fragment() {
         inflater.inflate(R.menu.characters_menu, menu)
 
         val searchItem = menu.findItem(R.id.action_characters_search)
-        val searchView = searchItem.actionView as SearchView
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                viewModel.getQueriedPage()
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                return viewModel.updateQueryText(newText)
-            }
-        })
-
         searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 return true
@@ -88,10 +76,40 @@ class CharactersFragment : Fragment() {
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
                 viewModel.updateQueryText("")
-                viewModel.getQueriedPage()
+                viewModel.getFirstPage()
                 return true
             }
         })
+
+        val searchView = searchItem.actionView as SearchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.getFirstPage()
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return viewModel.updateQueryText(newText)
+            }
+        })
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_filter_with_images -> {
+                item.isChecked = !item.isChecked
+                viewModel.onToggleWithImageFilter(item.isChecked)
+                viewModel.getFirstPage()
+                return true
+            }
+            R.id.action_filter_with_descriptions -> {
+                item.isChecked = !item.isChecked
+                viewModel.onToggleWithDescriptionFilter(item.isChecked)
+                viewModel.getFirstPage()
+                return true
+            }
+            else -> false
+        }
     }
 
     override fun onDestroyView() {

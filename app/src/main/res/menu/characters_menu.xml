@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
@@ -8,9 +9,27 @@
         android:title="@string/search"
         android:queryHint="@string/characters_search_query_hint_text"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="always|collapseActionView"/>
+        app:showAsAction="always|collapseActionView"
+        tools:ignore="AlwaysShowAction" />
     <item
-        android:title="Item"
-        app:showAsAction="always" />
+        android:id="@+id/action_filter_unique"
+        android:title="@string/filter_unique"
+        android:checkable="true"
+        android:checked="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_filter_with_images"
+        android:title="@string/filter_with_images"
+        android:checkable="true"
+        android:checked="false"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_filter_with_descriptions"
+        android:title="@string/filter_with_descriptions"
+        android:checkable="true"
+        android:checked="false"
+        app:showAsAction="never"/>
 
 </menu>
