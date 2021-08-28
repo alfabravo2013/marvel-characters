@@ -9,4 +9,6 @@
     <string name="character_not_found">Character not found</string>
     <string name="page_not_found">Cannot load characters</string>
     <string name="unknown_error">An error occurred, please try again</string>
+    <string name="search">Search</string>
+    <string name="characters_search_query_hint_text">Type the character name</string>
 </resources>

@@ -23,6 +23,16 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         getCharactersPage(DIRECTION.CURRENT)
     }
 
+    fun updateQueryText(text: String?): Boolean {
+        return charactersUseCase.updateQueryText(text)
+    }
+
+    fun getQueriedPage() {
+        Log.d("!@#", "getQueriedPage: getting queried page")
+        _onEvent.value = OnEvent.CleanList
+        getCharactersPage(DIRECTION.CURRENT)
+    }
+
     fun getNextPage() {
         getCharactersPage(DIRECTION.NEXT)
     }
@@ -43,7 +53,7 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
             withContext(Dispatchers.IO) {
                 when (direction) {
                     DIRECTION.NEXT -> charactersUseCase.getNextPage(20)
-                    DIRECTION.CURRENT -> charactersUseCase.getCurrentPage(20)
+                    DIRECTION.CURRENT -> charactersUseCase.getFirstPage(20)
                     DIRECTION.PREVIOUS -> charactersUseCase.getPrevPage(20)
                 }
             }
@@ -72,6 +82,7 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     sealed class OnEvent {
         object ShowLoading : OnEvent()
         object HideLoading : OnEvent()
+        object CleanList : OnEvent()
         data class ShowError(val errorId: Int) : OnEvent()
         data class NextPage(val data: CharactersItemPage) : OnEvent()
         data class PrevPage(val data: CharactersItemPage) : OnEvent()

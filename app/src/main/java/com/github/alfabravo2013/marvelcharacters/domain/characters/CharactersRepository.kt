@@ -5,6 +5,8 @@ import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.C
 
 class CharactersRepository(private val remoteDataSource: CharactersRemoteDataSource) {
 
+    fun updateQueryText(text: String) = remoteDataSource.updateQueryText(text)
+
     suspend fun getNextPage(pageSize: Int): CharactersItemPage {
         return remoteDataSource.getNextPage(pageSize).toCharacterItemPage()
     }
@@ -13,7 +15,7 @@ class CharactersRepository(private val remoteDataSource: CharactersRemoteDataSou
         return remoteDataSource.getPrevPage(pageSize).toCharacterItemPage()
     }
 
-    suspend fun getCurrentPage(pageSize: Int): CharactersItemPage {
-        return remoteDataSource.getCurrentPage(pageSize).toCharacterItemPage()
+    suspend fun getFirstPage(pageSize: Int): CharactersItemPage {
+        return remoteDataSource.getFirstPage(pageSize).toCharacterItemPage()
     }
 }

@@ -2,14 +2,17 @@ package com.github.alfabravo2013.marvelcharacters.presentation.characters
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.databinding.FragmentCharactersBinding
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.OnEvent
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -33,6 +36,7 @@ class CharactersFragment : Fragment() {
             is OnEvent.ShowLoading -> binding.charactersProgressBar.visibility = View.VISIBLE
             is OnEvent.HideLoading -> binding.charactersProgressBar.visibility = View.GONE
             is OnEvent.ShowError -> showError(event.errorId)
+            is OnEvent.CleanList -> adapter.clearList()
             is OnEvent.NextPage -> adapter.addNextPage(event.data)
             is OnEvent.PrevPage -> adapter.addPrevPage(event.data)
         }
@@ -56,6 +60,27 @@ class CharactersFragment : Fragment() {
         }
 
         viewModel.onEvent.observe(viewLifecycleOwner, observer)
+
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.characters_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+
+        val searchItem = menu.findItem(R.id.action_characters_search)
+        val searchView = searchItem.actionView as SearchView
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.getQueriedPage()
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return viewModel.updateQueryText(newText)
+            }
+        })
     }
 
     override fun onDestroyView() {

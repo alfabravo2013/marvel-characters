@@ -15,6 +15,13 @@ interface MarvelApi {
         @Query("limit") limit: Int
     ): CharacterDataWrapper
 
+    @GET(CHARACTERS_PAGE_ENDPOINT)
+    suspend fun getCharactersPage(
+        @Query("offset") offset: Int,
+        @Query("limit") limit: Int,
+        @Query("nameStartsWith") name: String
+    ): CharacterDataWrapper
+
     @GET(CHARACTERS_ID_ENDPOINT)
     suspend fun getCharacterById(
         @Path("characterId") characterId: Int

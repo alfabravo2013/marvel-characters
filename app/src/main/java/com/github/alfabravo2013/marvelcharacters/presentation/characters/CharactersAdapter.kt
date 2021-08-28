@@ -70,6 +70,14 @@ class CharacterListAdapter(
         notifyItemRangeInserted(startPosition, page.characters.size)
     }
 
+    fun clearList() {
+        val prevCount = itemCount
+        characters.clear()
+        notifyItemRangeRemoved(0, prevCount)
+        isFirstPageLoaded = false
+        isLastPageLoaded = false
+    }
+
     private fun updatePageStatus(page: CharactersItemPage) {
         if (page.prevOffset == null) {
             isFirstPageLoaded = true
