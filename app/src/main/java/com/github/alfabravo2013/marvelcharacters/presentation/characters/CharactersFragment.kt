@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.alfabravo2013.marvelcharacters.databinding.FragmentCharactersBinding
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.OnEvent
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -18,9 +19,10 @@ class CharactersFragment : Fragment() {
 
     private val adapter by lazy {
         CharacterListAdapter(
-            { viewModel.getCharactersPage() },
-            { id -> navigateToDetail(id) }
-        )
+            onStartReached = { viewModel.getPrevPage() },
+            onEndReached = { viewModel.getNextPage() },
+            onItemClicked = { id -> navigateToDetail(id) }
+        ).apply { setHasStableIds(true) }
     }
 
     private var _binding: FragmentCharactersBinding? = null
@@ -31,7 +33,8 @@ class CharactersFragment : Fragment() {
             is OnEvent.ShowLoading -> binding.charactersProgressBar.visibility = View.VISIBLE
             is OnEvent.HideLoading -> binding.charactersProgressBar.visibility = View.GONE
             is OnEvent.ShowError -> showError(event.errorId)
-            is OnEvent.SubmitData -> adapter.addList(event.data)
+            is OnEvent.NextPage -> adapter.addNextPage(event.data)
+            is OnEvent.PrevPage -> adapter.addPrevPage(event.data)
         }
     }
 
@@ -49,7 +52,7 @@ class CharactersFragment : Fragment() {
 
         binding.charactersRetryButton.setOnClickListener {
             it.visibility = View.GONE
-            viewModel.getCharactersPage()
+            viewModel.getNextPage()
         }
 
         viewModel.onEvent.observe(viewLifecycleOwner, observer)
@@ -61,9 +64,15 @@ class CharactersFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        val layoutManager = GridLayoutManager(requireContext(), getSpanCount())
-        binding.characterListRecyclerView.layoutManager = layoutManager
-        binding.characterListRecyclerView.adapter = adapter
+        val layoutManager = StaggeredGridLayoutManager(
+            getSpanCount(),
+            StaggeredGridLayoutManager.VERTICAL
+        )
+        binding.apply {
+            characterListRecyclerView.layoutManager = layoutManager
+            characterListRecyclerView.adapter = adapter
+//            characterListRecyclerView.setHasFixedSize(true)
+        }
     }
 
     private fun getSpanCount(): Int {

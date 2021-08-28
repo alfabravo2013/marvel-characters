@@ -1,24 +1,37 @@
 package com.github.alfabravo2013.marvelcharacters.presentation.characters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.github.alfabravo2013.marvelcharacters.databinding.CharactersItemBinding
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
 
 class CharacterListAdapter(
-    private val onListEnd: () -> Unit,
+    private val onEndReached: () -> Unit,
+    private val onStartReached: () -> Unit,
     private val onItemClicked: (Int) -> Unit
 ) : RecyclerView.Adapter<CharacterListAdapter.ViewHolder>() {
 
+    val characterComparator = object : DiffUtil.ItemCallback<CharactersItem>() {
+        override fun areItemsTheSame(oldItem: CharactersItem, newItem: CharactersItem): Boolean =
+            oldItem.id == newItem.id
+
+        override fun areContentsTheSame(oldItem: CharactersItem, newItem: CharactersItem): Boolean =
+            oldItem == newItem
+    }
+
     private val characters = mutableListOf<CharactersItem>()
 
+    private var isFirstPageLoaded = false
+    private var isLastPageLoaded = false
+
     init {
-        if (characters.isEmpty()) {
-            onListEnd()
-        }
+        Log.d("!@#", "adapter init block")
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -32,17 +45,38 @@ class CharacterListAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(characters[position])
-        if (position >= itemCount - 4) {
-            onListEnd()
+
+        if (position == 0 && !isFirstPageLoaded) {
+            onStartReached.invoke()
+        } else if (position >= itemCount - 6 && !isLastPageLoaded) {
+            onEndReached.invoke()
         }
     }
 
     override fun getItemCount(): Int = characters.size
 
-    fun addList(list: List<CharactersItem>) {
+    override fun getItemId(position: Int): Long = characters[position].id.toLong()
+
+    fun addPrevPage(page: CharactersItemPage) {
+        updatePageStatus(page)
+        characters.addAll(0, page.characters)
+        notifyItemRangeInserted(0, page.characters.size)
+    }
+
+    fun addNextPage(page: CharactersItemPage) {
+        updatePageStatus(page)
         val startPosition = characters.size
-        characters.addAll(list)
-        notifyItemRangeInserted(startPosition, list.size)
+        characters.addAll(page.characters)
+        notifyItemRangeInserted(startPosition, page.characters.size)
+    }
+
+    private fun updatePageStatus(page: CharactersItemPage) {
+        if (page.prevOffset == null) {
+            isFirstPageLoaded = true
+        }
+        if (page.nextOffset == null) {
+            isLastPageLoaded = true
+        }
     }
 
     inner class ViewHolder(

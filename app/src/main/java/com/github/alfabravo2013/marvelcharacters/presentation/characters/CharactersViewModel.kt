@@ -1,11 +1,12 @@
 package com.github.alfabravo2013.marvelcharacters.presentation.characters
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.domain.characters.CharactersUseCase
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
-import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
 import com.github.alfabravo2013.marvelcharacters.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +18,20 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     private val _onEvent = SingleLiveEvent<OnEvent>()
     val onEvent: SingleLiveEvent<OnEvent> get() = _onEvent
 
-    fun getCharactersPage() = viewModelScope.launch {
+    init {
+        Log.d("!@#", "init block, getting current")
+        getCharactersPage(DIRECTION.CURRENT)
+    }
+
+    fun getNextPage() {
+        getCharactersPage(DIRECTION.NEXT)
+    }
+
+    fun getPrevPage() {
+        getCharactersPage(DIRECTION.PREVIOUS)
+    }
+
+    private fun getCharactersPage(direction: DIRECTION) = viewModelScope.launch {
         if (isLoading) {
             return@launch
         }
@@ -27,10 +41,18 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
 
         runCatching {
             withContext(Dispatchers.IO) {
-                charactersUseCase.getCharactersPage(20)
+                when (direction) {
+                    DIRECTION.NEXT -> charactersUseCase.getNextPage(20)
+                    DIRECTION.CURRENT -> charactersUseCase.getCurrentPage(20)
+                    DIRECTION.PREVIOUS -> charactersUseCase.getPrevPage(20)
+                }
             }
-        }.onSuccess { characters ->
-            _onEvent.value = OnEvent.SubmitData(characters)
+        }.onSuccess { page ->
+            when (direction) {
+                DIRECTION.NEXT -> _onEvent.value = OnEvent.NextPage(page)
+                DIRECTION.CURRENT -> _onEvent.value = OnEvent.NextPage(page)
+                DIRECTION.PREVIOUS -> _onEvent.value = OnEvent.PrevPage(page)
+            }
         }.onFailure { error ->
             showError(error)
         }
@@ -51,6 +73,9 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         object ShowLoading : OnEvent()
         object HideLoading : OnEvent()
         data class ShowError(val errorId: Int) : OnEvent()
-        data class SubmitData(val data: List<CharactersItem>) : OnEvent()
+        data class NextPage(val data: CharactersItemPage) : OnEvent()
+        data class PrevPage(val data: CharactersItemPage) : OnEvent()
     }
+
+    private enum class DIRECTION { NEXT, CURRENT, PREVIOUS }
 }
