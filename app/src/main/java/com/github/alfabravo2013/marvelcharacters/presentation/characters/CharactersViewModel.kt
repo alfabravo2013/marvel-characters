@@ -1,6 +1,5 @@
 package com.github.alfabravo2013.marvelcharacters.presentation.characters
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.alfabravo2013.marvelcharacters.R
@@ -19,7 +18,6 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     val onEvent: SingleLiveEvent<OnEvent> get() = _onEvent
 
     init {
-        Log.d("!@#", "init block, getting current")
         getCharactersPage(DIRECTION.CURRENT)
     }
 
@@ -28,8 +26,11 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     }
 
     fun getQueriedPage() {
-        Log.d("!@#", "getQueriedPage: getting queried page")
         _onEvent.value = OnEvent.CleanList
+        getCharactersPage(DIRECTION.CURRENT)
+    }
+
+    fun getFirstPage() {
         getCharactersPage(DIRECTION.CURRENT)
     }
 

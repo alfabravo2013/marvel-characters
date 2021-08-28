@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
@@ -60,13 +61,11 @@ class CharactersFragment : Fragment() {
         }
 
         viewModel.onEvent.observe(viewLifecycleOwner, observer)
-
         setHasOptionsMenu(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.characters_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
 
         val searchItem = menu.findItem(R.id.action_characters_search)
         val searchView = searchItem.actionView as SearchView
@@ -79,6 +78,18 @@ class CharactersFragment : Fragment() {
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 return viewModel.updateQueryText(newText)
+            }
+        })
+
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                viewModel.updateQueryText("")
+                viewModel.getQueriedPage()
+                return true
             }
         })
     }
@@ -96,7 +107,6 @@ class CharactersFragment : Fragment() {
         binding.apply {
             characterListRecyclerView.layoutManager = layoutManager
             characterListRecyclerView.adapter = adapter
-//            characterListRecyclerView.setHasFixedSize(true)
         }
     }
 

@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.activityMainToolbar)
         setupToolbar()
         binding.activityMainToolbar.title = ""
     }
