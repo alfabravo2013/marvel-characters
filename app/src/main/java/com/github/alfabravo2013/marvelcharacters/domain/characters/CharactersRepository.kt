@@ -48,7 +48,7 @@ class CharactersRepository(private val remoteDataSource: CharactersRemoteDataSou
         } else {
             this.copy(
                 characters = this.characters.filter { character ->
-                    filters.all { it.filter.invoke(character) }
+                    filters.all { it.filter(character) }
                 }
             )
         }

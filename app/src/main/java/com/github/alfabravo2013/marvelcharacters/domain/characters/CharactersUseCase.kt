@@ -26,7 +26,7 @@ class CharactersUseCase(private val charactersRepository: CharactersRepository) 
     }
 
     suspend fun getFirstPage(): CharactersItemPage {
-        return charactersRepository.getFirstPage(DEFAULT_PAGE_SIZE * 2)
+        return charactersRepository.getFirstPage(DEFAULT_PAGE_SIZE)
     }
 
     fun addWithImageFilter() {

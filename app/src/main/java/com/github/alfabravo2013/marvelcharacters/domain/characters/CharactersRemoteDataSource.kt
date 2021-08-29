@@ -42,6 +42,7 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
         }
 
         Log.d("!@#", "getCharactersPage: ${response.code}; ${response.status}")
+        Log.d("!@#", "getCharactersPage: count=${response.data.count}, size=${response.data.results.size}")
 
         when (response.code) {
             200 -> {
