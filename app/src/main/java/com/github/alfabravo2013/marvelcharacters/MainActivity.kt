@@ -8,7 +8,7 @@ import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.github.alfabravo2013.marvelcharacters.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-    private val binding: ActivityMainBinding by lazy {
+    val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
 

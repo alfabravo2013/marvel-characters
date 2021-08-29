@@ -9,9 +9,14 @@
     <string name="character_not_found">Character not found</string>
     <string name="page_not_found">Cannot load characters</string>
     <string name="unknown_error">An error occurred, please try again</string>
+
+<!--    Filters -->
     <string name="search">Search</string>
     <string name="characters_search_query_hint_text">Type the character name</string>
     <string name="filter_unique">Unique names</string>
     <string name="filter_with_images">With images</string>
     <string name="filter_with_descriptions">With descriptions</string>
+
+<!--    Stub message -->
+    <string name="not_implemented">This feature is not implemented yet</string>
 </resources>

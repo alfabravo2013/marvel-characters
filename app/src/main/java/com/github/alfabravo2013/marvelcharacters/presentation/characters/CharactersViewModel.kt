@@ -1,12 +1,14 @@
 package com.github.alfabravo2013.marvelcharacters.presentation.characters
 
-import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.domain.characters.CharactersUseCase
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersScreenState
 import com.github.alfabravo2013.marvelcharacters.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,15 +20,27 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     private val _onEvent = SingleLiveEvent<OnEvent>()
     val onEvent: SingleLiveEvent<OnEvent> get() = _onEvent
 
+    private val _screenState = MutableLiveData<CharactersScreenState>()
+    val screenState: LiveData<CharactersScreenState> get() = _screenState
+
     init {
         getCharactersPage(PAGE.FIRST)
+        _screenState.value = CharactersScreenState()
     }
 
     fun updateQueryText(text: String?): Boolean {
         return charactersUseCase.updateQueryText(text)
     }
 
-    fun onToggleWithImageFilter(isChecked: Boolean) {
+    fun onToggleUniqueNamesFilter() {
+        // TODO: 29.08.2021 add this feature
+        _onEvent.value = OnEvent.ShowError(R.string.not_implemented)
+    }
+
+    fun onToggleWithImageFilter() {
+        val isChecked = _screenState.value?.hasImageFilterOn?.not() ?: true
+        _screenState.value = _screenState.value?.copy(hasImageFilterOn = isChecked)
+
         if (isChecked) {
             charactersUseCase.addWithImageFilter()
         } else {
@@ -36,7 +50,10 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         getCharactersPage(PAGE.FIRST)
     }
 
-    fun onToggleWithDescriptionFilter(isChecked: Boolean) {
+    fun onToggleWithDescriptionFilter() {
+        val isChecked = _screenState.value?.hasDescriptionFilterOn?.not() ?: true
+        _screenState.value = _screenState.value?.copy(hasDescriptionFilterOn = isChecked)
+
         if (isChecked) {
             charactersUseCase.addWithDescriptionFilter()
         } else {
@@ -85,7 +102,6 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
                 OnEvent.ShowError(R.string.page_not_found)
             else -> {
                 _onEvent.value = OnEvent.ShowError(R.string.unknown_error)
-                Log.d("!@#", "showError: ${ex.message}")
             }
         }
     }

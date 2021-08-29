@@ -12,21 +12,21 @@
         app:showAsAction="always|collapseActionView"
         tools:ignore="AlwaysShowAction" />
     <item
-        android:id="@+id/action_filter_unique"
+        android:id="@+id/action_filter_names"
         android:title="@string/filter_unique"
         android:checkable="true"
         android:checked="false"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_filter_with_images"
+        android:id="@+id/action_filter_images"
         android:title="@string/filter_with_images"
         android:checkable="true"
         android:checked="false"
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/action_filter_with_descriptions"
+        android:id="@+id/action_filter_descriptions"
         android:title="@string/filter_with_descriptions"
         android:checkable="true"
         android:checked="false"
