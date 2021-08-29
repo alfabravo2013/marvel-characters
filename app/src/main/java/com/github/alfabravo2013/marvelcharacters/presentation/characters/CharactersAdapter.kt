@@ -1,9 +1,9 @@
 package com.github.alfabravo2013.marvelcharacters.presentation.characters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -15,24 +15,10 @@ class CharacterListAdapter(
     private val onEndReached: () -> Unit,
     private val onStartReached: () -> Unit,
     private val onItemClicked: (Int) -> Unit
-) : RecyclerView.Adapter<CharacterListAdapter.ViewHolder>() {
-
-    val characterComparator = object : DiffUtil.ItemCallback<CharactersItem>() {
-        override fun areItemsTheSame(oldItem: CharactersItem, newItem: CharactersItem): Boolean =
-            oldItem.id == newItem.id
-
-        override fun areContentsTheSame(oldItem: CharactersItem, newItem: CharactersItem): Boolean =
-            oldItem == newItem
-    }
-
-    private val characters = mutableListOf<CharactersItem>()
+) : ListAdapter<CharactersItem, CharacterListAdapter.ViewHolder>(CharacterComparator) {
 
     private var isFirstPageLoaded = false
     private var isLastPageLoaded = false
-
-    init {
-        Log.d("!@#", "adapter init block")
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = CharactersItemBinding.inflate(
@@ -44,7 +30,7 @@ class CharacterListAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(characters[position])
+        holder.bind(getItem(position))
 
         if (position == 0 && !isFirstPageLoaded) {
             onStartReached.invoke()
@@ -53,27 +39,20 @@ class CharacterListAdapter(
         }
     }
 
-    override fun getItemCount(): Int = characters.size
-
-    override fun getItemId(position: Int): Long = characters[position].id.toLong()
+    override fun getItemId(position: Int): Long = getItem(position).id.toLong()
 
     fun addPrevPage(page: CharactersItemPage) {
         updatePageStatus(page)
-        characters.addAll(0, page.characters)
-        notifyItemRangeInserted(0, page.characters.size)
+        submitList(page.characters)
     }
 
     fun addNextPage(page: CharactersItemPage) {
         updatePageStatus(page)
-        val startPosition = characters.size
-        characters.addAll(page.characters)
-        notifyItemRangeInserted(startPosition, page.characters.size)
+        submitList(page.characters)
     }
 
     fun clearList() {
-        val prevCount = itemCount
-        characters.clear()
-        notifyItemRangeRemoved(0, prevCount)
+        submitList(null)
         isFirstPageLoaded = false
         isLastPageLoaded = false
     }
@@ -93,7 +72,7 @@ class CharacterListAdapter(
 
         init {
             binding.root.setOnClickListener {
-                val id = characters[bindingAdapterPosition].id
+                val id = currentList[bindingAdapterPosition].id
                 onItemClicked(id)
             }
         }
@@ -106,5 +85,13 @@ class CharacterListAdapter(
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(binding.charactersThumbnail)
         }
+    }
+
+    object CharacterComparator : DiffUtil.ItemCallback<CharactersItem>() {
+        override fun areItemsTheSame(oldItem: CharactersItem, newItem: CharactersItem): Boolean =
+            oldItem.id == newItem.id
+
+        override fun areContentsTheSame(oldItem: CharactersItem, newItem: CharactersItem): Boolean =
+            oldItem == newItem
     }
 }

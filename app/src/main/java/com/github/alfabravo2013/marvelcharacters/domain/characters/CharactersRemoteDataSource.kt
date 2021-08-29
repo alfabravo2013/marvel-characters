@@ -3,9 +3,12 @@ package com.github.alfabravo2013.marvelcharacters.domain.characters
 import android.util.Log
 import com.github.alfabravo2013.marvelcharacters.domain.characters.models.MarvelCharacterPage
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
+import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
 import com.github.alfabravo2013.marvelcharacters.utils.MAX_PAGE_SIZE
 
 class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
+    private val loadedCharacters = mutableSetOf<MarvelCharacter>()
+
     private var queryText = ""
 
     private var currentOffset = 0
@@ -48,6 +51,7 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
             200 -> {
                 total = response.data.total
                 currentOffset = response.data.offset
+                loadedCharacters.addAll(response.data.results)
 
                 return MarvelCharacterPage(
                     prevOffset = if (currentOffset == 0) {
@@ -58,7 +62,7 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
                     } else {
                         currentOffset + pageSize
                     },
-                    characters = response.data.results
+                    characters = loadedCharacters.sortedBy { it.name }.toList()
                 )
             }
             409 -> throw MarvelApi.BadRequestException()
