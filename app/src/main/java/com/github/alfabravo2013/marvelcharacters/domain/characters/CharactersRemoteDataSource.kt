@@ -1,8 +1,8 @@
 package com.github.alfabravo2013.marvelcharacters.domain.characters
 
+import android.util.Log
 import com.github.alfabravo2013.marvelcharacters.domain.characters.models.MarvelCharacterPage
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
-import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
 import com.github.alfabravo2013.marvelcharacters.utils.MAX_PAGE_SIZE
 
 class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
@@ -40,6 +40,8 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
                 limit = pageSize.coerceIn(1..MAX_PAGE_SIZE)
             )
         }
+
+        Log.d("!@#", "getCharactersPage: ${response.code}; ${response.status}")
 
         when (response.code) {
             200 -> {

@@ -1,5 +1,6 @@
 package com.github.alfabravo2013.marvelcharacters.presentation.characters
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.alfabravo2013.marvelcharacters.R
@@ -18,7 +19,7 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     val onEvent: SingleLiveEvent<OnEvent> get() = _onEvent
 
     init {
-        getCharactersPage(DIRECTION.CURRENT)
+        getCharactersPage(PAGE.FIRST)
     }
 
     fun updateQueryText(text: String?): Boolean {
@@ -31,6 +32,8 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         } else {
             charactersUseCase.removeWithImageFilter()
         }
+
+        getCharactersPage(PAGE.FIRST)
     }
 
     fun onToggleWithDescriptionFilter(isChecked: Boolean) {
@@ -39,14 +42,11 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         } else {
             charactersUseCase.removeWithDescriptionFilter()
         }
+
+        getCharactersPage(PAGE.FIRST)
     }
 
-    fun getFirstPage() {
-        _onEvent.value = OnEvent.CleanList
-        getCharactersPage(DIRECTION.CURRENT)
-    }
-
-    fun getCharactersPage(direction: DIRECTION) = viewModelScope.launch {
+    fun getCharactersPage(requestedPage: PAGE) = viewModelScope.launch {
         if (isLoading) {
             return@launch
         }
@@ -56,17 +56,20 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
 
         runCatching {
             withContext(Dispatchers.IO) {
-                when (direction) {
-                    DIRECTION.NEXT -> charactersUseCase.getNextPage()
-                    DIRECTION.CURRENT -> charactersUseCase.getFirstPage()
-                    DIRECTION.PREVIOUS -> charactersUseCase.getPrevPage()
+                when (requestedPage) {
+                    PAGE.NEXT -> charactersUseCase.getNextPage()
+                    PAGE.FIRST -> {
+                        _onEvent.postValue(OnEvent.CleanList)
+                        charactersUseCase.getFirstPage()
+                    }
+                    PAGE.PREVIOUS -> charactersUseCase.getPrevPage()
                 }
             }
-        }.onSuccess { page ->
-            when (direction) {
-                DIRECTION.NEXT -> _onEvent.value = OnEvent.NextPage(page)
-                DIRECTION.CURRENT -> _onEvent.value = OnEvent.NextPage(page)
-                DIRECTION.PREVIOUS -> _onEvent.value = OnEvent.PrevPage(page)
+        }.onSuccess { fetchedPage ->
+            when (requestedPage) {
+                PAGE.NEXT -> _onEvent.value = OnEvent.NextPage(fetchedPage)
+                PAGE.FIRST -> _onEvent.value = OnEvent.NextPage(fetchedPage)
+                PAGE.PREVIOUS -> _onEvent.value = OnEvent.PrevPage(fetchedPage)
             }
         }.onFailure { error ->
             showError(error)
@@ -80,7 +83,10 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         when (ex) {
             is MarvelApi.BadRequestException -> _onEvent.value =
                 OnEvent.ShowError(R.string.page_not_found)
-            else -> _onEvent.value = OnEvent.ShowError(R.string.unknown_error)
+            else -> {
+                _onEvent.value = OnEvent.ShowError(R.string.unknown_error)
+                Log.d("!@#", "showError: ${ex.message}")
+            }
         }
     }
 
@@ -93,5 +99,5 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         data class PrevPage(val data: CharactersItemPage) : OnEvent()
     }
 
-    enum class DIRECTION { NEXT, CURRENT, PREVIOUS }
+    enum class PAGE { NEXT, FIRST, PREVIOUS }
 }

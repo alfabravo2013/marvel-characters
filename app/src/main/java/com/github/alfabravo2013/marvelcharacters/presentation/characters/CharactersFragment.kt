@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.databinding.FragmentCharactersBinding
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.OnEvent
-import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.DIRECTION
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.PAGE
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class CharactersFragment : Fragment() {
@@ -24,8 +24,8 @@ class CharactersFragment : Fragment() {
 
     private val adapter by lazy {
         CharacterListAdapter(
-            onStartReached = { viewModel.getCharactersPage(DIRECTION.PREVIOUS) },
-            onEndReached = { viewModel.getCharactersPage(DIRECTION.NEXT) },
+            onStartReached = { viewModel.getCharactersPage(PAGE.PREVIOUS) },
+            onEndReached = { viewModel.getCharactersPage(PAGE.NEXT) },
             onItemClicked = { id -> navigateToDetail(id) }
         ).apply { setHasStableIds(true) }
     }
@@ -58,7 +58,7 @@ class CharactersFragment : Fragment() {
 
         binding.charactersRetryButton.setOnClickListener {
             it.visibility = View.GONE
-            viewModel.getFirstPage()
+            viewModel.getCharactersPage(PAGE.FIRST)
         }
 
         viewModel.onEvent.observe(viewLifecycleOwner, observer)
@@ -76,7 +76,7 @@ class CharactersFragment : Fragment() {
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
                 viewModel.updateQueryText("")
-                viewModel.getFirstPage()
+                viewModel.getCharactersPage(PAGE.FIRST)
                 return true
             }
         })
@@ -84,7 +84,7 @@ class CharactersFragment : Fragment() {
         val searchView = searchItem.actionView as SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                viewModel.getFirstPage()
+                viewModel.getCharactersPage(PAGE.FIRST)
                 return true
             }
 
@@ -99,13 +99,11 @@ class CharactersFragment : Fragment() {
             R.id.action_filter_with_images -> {
                 item.isChecked = !item.isChecked
                 viewModel.onToggleWithImageFilter(item.isChecked)
-                viewModel.getFirstPage()
                 return true
             }
             R.id.action_filter_with_descriptions -> {
                 item.isChecked = !item.isChecked
                 viewModel.onToggleWithDescriptionFilter(item.isChecked)
-                viewModel.getFirstPage()
                 return true
             }
             else -> false
