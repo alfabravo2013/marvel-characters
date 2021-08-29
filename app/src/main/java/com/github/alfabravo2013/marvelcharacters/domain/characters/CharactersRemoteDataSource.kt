@@ -27,6 +27,7 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
     }
 
     suspend fun getFirstPage(pageSize: Int): MarvelCharacterPage {
+        loadedCharacters.clear()
         return getCharactersPage(0, pageSize)
     }
 

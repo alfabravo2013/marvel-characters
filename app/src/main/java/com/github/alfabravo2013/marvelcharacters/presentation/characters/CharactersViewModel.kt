@@ -29,6 +29,8 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     }
 
     fun updateQueryText(text: String?): Boolean {
+        // TODO: 29.08.2021 store the SearchView state to avoid collapsed and empty search text
+        //  while a search filter is applied
         return charactersUseCase.updateQueryText(text)
     }
 
