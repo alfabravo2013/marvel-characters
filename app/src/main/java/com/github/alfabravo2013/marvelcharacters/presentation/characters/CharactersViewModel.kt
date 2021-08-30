@@ -1,11 +1,14 @@
 package com.github.alfabravo2013.marvelcharacters.presentation.characters
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.domain.characters.CharactersUseCase
 import com.github.alfabravo2013.marvelcharacters.networking.MarvelApi
-import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersScreenState
 import com.github.alfabravo2013.marvelcharacters.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +20,56 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     private val _onEvent = SingleLiveEvent<OnEvent>()
     val onEvent: SingleLiveEvent<OnEvent> get() = _onEvent
 
-    fun getCharactersPage() = viewModelScope.launch {
+    private val _screenState = MutableLiveData<CharactersScreenState>()
+    val screenState: LiveData<CharactersScreenState> get() = _screenState
+
+    init {
+        // TODO: 30.08.2021 decide on if the view state should survive
+        // FIXME: 30.08.2021 current page is not displayed on configuration change,
+        //  consider using a separate LiveData object to observe current pages in View
+        _screenState.value = CharactersScreenState()
+        updateQueryText("")
+        getCharactersPage(PAGE.FIRST)
+    }
+
+    fun updateQueryText(text: String?): Boolean {
+        val result = charactersUseCase.updateQueryText(text)
+        _screenState.value = _screenState.value?.copy(searchQuery = result)
+        return result.isNotEmpty()
+    }
+
+    fun onToggleUniqueNamesFilter() {
+        // TODO: 29.08.2021 add this feature
+        _onEvent.value = OnEvent.ShowError(R.string.not_implemented)
+    }
+
+    fun onToggleWithImageFilter() {
+        val isChecked = _screenState.value?.hasImageFilterOn?.not() ?: true
+        _screenState.value = _screenState.value?.copy(hasImageFilterOn = isChecked)
+
+        if (isChecked) {
+            charactersUseCase.addWithImageFilter()
+        } else {
+            charactersUseCase.removeWithImageFilter()
+        }
+
+        getCharactersPage(PAGE.FIRST)
+    }
+
+    fun onToggleWithDescriptionFilter() {
+        val isChecked = _screenState.value?.hasDescriptionFilterOn?.not() ?: true
+        _screenState.value = _screenState.value?.copy(hasDescriptionFilterOn = isChecked)
+
+        if (isChecked) {
+            charactersUseCase.addWithDescriptionFilter()
+        } else {
+            charactersUseCase.removeWithDescriptionFilter()
+        }
+
+        getCharactersPage(PAGE.FIRST)
+    }
+
+    fun getCharactersPage(requestedPage: PAGE) = viewModelScope.launch {
         if (isLoading) {
             return@launch
         }
@@ -27,10 +79,18 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
 
         runCatching {
             withContext(Dispatchers.IO) {
-                charactersUseCase.getCharactersPage(20)
+                when (requestedPage) {
+                    PAGE.CURRENT -> charactersUseCase.getCurrentPages()
+                    PAGE.NEXT -> charactersUseCase.getNextPage()
+                    PAGE.FIRST -> {
+                        _onEvent.postValue(OnEvent.CleanList)
+                        charactersUseCase.getFirstPage()
+                    }
+                    PAGE.PREVIOUS -> charactersUseCase.getPrevPage()
+                }
             }
-        }.onSuccess { characters ->
-            _onEvent.value = OnEvent.SubmitData(characters)
+        }.onSuccess { fetchedPage ->
+            _onEvent.value = OnEvent.SubmitPage(fetchedPage)
         }.onFailure { error ->
             showError(error)
         }
@@ -43,14 +103,19 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         when (ex) {
             is MarvelApi.BadRequestException -> _onEvent.value =
                 OnEvent.ShowError(R.string.page_not_found)
-            else -> _onEvent.value = OnEvent.ShowError(R.string.unknown_error)
+            else -> {
+                _onEvent.value = OnEvent.ShowError(R.string.unknown_error)
+            }
         }
     }
 
     sealed class OnEvent {
         object ShowLoading : OnEvent()
         object HideLoading : OnEvent()
+        object CleanList : OnEvent()
         data class ShowError(val errorId: Int) : OnEvent()
-        data class SubmitData(val data: List<CharactersItem>) : OnEvent()
+        data class SubmitPage(val data: CharactersItemPage) : OnEvent()
     }
+
+    enum class PAGE { CURRENT, NEXT, FIRST, PREVIOUS }
 }

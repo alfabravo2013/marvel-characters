@@ -1,6 +1,8 @@
 package com.github.alfabravo2013.marvelcharacters.mappers
 
+import com.github.alfabravo2013.marvelcharacters.domain.characters.models.MarvelCharacterPage
 import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.Detail
 import java.math.BigInteger
@@ -23,6 +25,14 @@ fun MarvelCharacter.toDetail(): Detail {
             description
         },
         imageUrl = thumbnail.toString()
+    )
+}
+
+fun MarvelCharacterPage.toCharacterItemPage(): CharactersItemPage {
+    return CharactersItemPage(
+        prevOffset = prevOffset,
+        nextOffset = nextOffset,
+        characters = characters.map { it.toCharacterListItem() }
     )
 }
 

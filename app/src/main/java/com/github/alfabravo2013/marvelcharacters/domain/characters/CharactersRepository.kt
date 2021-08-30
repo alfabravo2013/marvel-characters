@@ -1,13 +1,35 @@
 package com.github.alfabravo2013.marvelcharacters.domain.characters
 
-import com.github.alfabravo2013.marvelcharacters.mappers.toCharacterListItem
-import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
+import com.github.alfabravo2013.marvelcharacters.domain.filters.Filters
+import com.github.alfabravo2013.marvelcharacters.domain.filters.applyFilters
+import com.github.alfabravo2013.marvelcharacters.mappers.toCharacterItemPage
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
 
-class CharactersRepository(private val remoteDataSource: CharactersRemoteDataSource) {
+class CharactersRepository(
+    private val remoteDataSource: CharactersRemoteDataSource,
+    private val localDataSource: CharactersLocalDataSource
+) {
+    fun updateQueryText(text: String) = remoteDataSource.updateQueryText(text)
 
-    suspend fun getCharactersPage(pageSize: Int): List<CharactersItem> {
-        return remoteDataSource.getCharactersPage(pageSize).map { marvelCharacter ->
-            marvelCharacter.toCharacterListItem()
-        }
+    suspend fun requestNextPage(pageSize: Int) {
+        val page = remoteDataSource.getNextPage(pageSize)
+        localDataSource.addPage(page)
     }
+
+    suspend fun requestPrevPage(pageSize: Int) {
+        val page = remoteDataSource.getPrevPage(pageSize)
+        localDataSource.addPage(page)
+    }
+
+    suspend fun requestFirstPage(pageSize: Int) {
+        localDataSource.clearCurrentPages()
+        val page = remoteDataSource.getFirstPage(pageSize)
+        localDataSource.addPage(page)
+    }
+
+    fun getCurrentPages(filters: Collection<Filters>): CharactersItemPage =
+        localDataSource
+            .getCurrentPages()
+            .applyFilters(filters)
+            .toCharacterItemPage()
 }
