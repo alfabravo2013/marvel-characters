@@ -1,73 +1,35 @@
 package com.github.alfabravo2013.marvelcharacters.domain.characters
 
-import com.github.alfabravo2013.marvelcharacters.domain.characters.models.MarvelCharacterPage
+import com.github.alfabravo2013.marvelcharacters.domain.filters.Filters
+import com.github.alfabravo2013.marvelcharacters.domain.filters.applyFilters
 import com.github.alfabravo2013.marvelcharacters.mappers.toCharacterItemPage
-import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
-import com.github.alfabravo2013.marvelcharacters.utils.IMAGE_UNAVAILABLE_EXTENSION
-import com.github.alfabravo2013.marvelcharacters.utils.IMAGE_UNAVAILABLE_PATH
 
-class CharactersRepository(private val remoteDataSource: CharactersRemoteDataSource) {
-
-    private val filters: MutableSet<Filter> = mutableSetOf()
-
-    fun addFilter(filter: Filter) {
-        filters.add(filter)
-    }
-
-    fun removeFilter(filter: Filter) {
-        filters.remove(filter)
-    }
-
+class CharactersRepository(
+    private val remoteDataSource: CharactersRemoteDataSource,
+    private val localDataSource: CharactersLocalDataSource
+) {
     fun updateQueryText(text: String) = remoteDataSource.updateQueryText(text)
 
-    suspend fun getNextPage(pageSize: Int): CharactersItemPage {
-        return remoteDataSource
-            .getNextPage(pageSize)
-            .applyFilters()
+    suspend fun requestNextPage(pageSize: Int) {
+        val page = remoteDataSource.getNextPage(pageSize)
+        localDataSource.addPage(page)
+    }
+
+    suspend fun requestPrevPage(pageSize: Int) {
+        val page = remoteDataSource.getPrevPage(pageSize)
+        localDataSource.addPage(page)
+    }
+
+    suspend fun requestFirstPage(pageSize: Int) {
+        localDataSource.clearCurrentPages()
+        val page = remoteDataSource.getFirstPage(pageSize)
+        localDataSource.addPage(page)
+    }
+
+    fun getCurrentPages(filters: Collection<Filters>): CharactersItemPage =
+        localDataSource
+            .getCurrentPages()
+            .applyFilters(filters)
             .toCharacterItemPage()
-    }
-
-    suspend fun getPrevPage(pageSize: Int): CharactersItemPage {
-        return remoteDataSource
-            .getPrevPage(pageSize)
-            .applyFilters()
-            .toCharacterItemPage()
-    }
-
-    suspend fun getFirstPage(pageSize: Int): CharactersItemPage {
-        return remoteDataSource
-            .getFirstPage(pageSize)
-            .applyFilters()
-            .toCharacterItemPage()
-    }
-
-    private fun MarvelCharacterPage.applyFilters(): MarvelCharacterPage {
-        return if (filters.isEmpty()) {
-            this
-        } else {
-            this.copy(
-                characters = this.characters.filter { character ->
-                    filters.all { it.filter(character) }
-                }
-            )
-        }
-    }
-
-    sealed class Filter {
-        abstract val filter: (MarvelCharacter) -> Boolean
-
-        object HasImage : Filter() {
-            override val filter: (MarvelCharacter) -> Boolean = { it ->
-                !it.thumbnail.path.contains(IMAGE_UNAVAILABLE_PATH) &&
-                        !it.thumbnail.extension.contains(IMAGE_UNAVAILABLE_EXTENSION)
-            }
-        }
-
-        object HasDescription : Filter() {
-            override val filter: (MarvelCharacter) -> Boolean = { it ->
-                it.description.isNotEmpty()
-            }
-        }
-    }
 }

@@ -7,12 +7,12 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.SearchView
 import android.widget.Toast
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.databinding.FragmentCharactersBinding
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.OnEvent
@@ -40,10 +40,11 @@ class CharactersFragment : Fragment() {
             is OnEvent.HideLoading -> binding.charactersProgressBar.visibility = View.GONE
             is OnEvent.ShowError -> showError(event.errorId)
             is OnEvent.CleanList -> adapter.clearList()
-            is OnEvent.NextPage -> adapter.addNextPage(event.data)
-            is OnEvent.PrevPage -> adapter.addPrevPage(event.data)
+            is OnEvent.SubmitPage -> adapter.submitPage(event.data)
         }
     }
+
+    private lateinit var searchView: SearchView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -90,9 +91,15 @@ class CharactersFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.getCharactersPage(PAGE.CURRENT)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        searchView.setOnQueryTextListener(null)
     }
 
     private fun setupMenuStateObserver(menu: Menu) {
@@ -106,20 +113,35 @@ class CharactersFragment : Fragment() {
     }
 
     private fun setupSearchView(menu: Menu) {
+        setupSearchItem(menu)
+        setupSearchQuery(menu)
+    }
+
+    private fun setupSearchItem(menu: Menu) {
         val searchItem = menu.findItem(R.id.action_characters_search)
+
         searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 return true
             }
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                viewModel.updateQueryText("")
                 viewModel.getCharactersPage(PAGE.FIRST)
                 return true
             }
         })
+    }
 
-        val searchView = searchItem.actionView as SearchView
+    private fun setupSearchQuery(menu: Menu) {
+        val searchItem = menu.findItem(R.id.action_characters_search)
+        searchView = searchItem.actionView as SearchView
+        val queryText = viewModel.screenState.value?.searchQuery ?: ""
+
+        if (queryText.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(queryText, false)
+        }
+
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 viewModel.getCharactersPage(PAGE.FIRST)
@@ -133,10 +155,11 @@ class CharactersFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        val layoutManager = StaggeredGridLayoutManager(
-            getSpanCount(),
-            StaggeredGridLayoutManager.VERTICAL
+        val layoutManager = GridLayoutManager(
+            requireContext(),
+            getSpanCount()
         )
+
         binding.apply {
             characterListRecyclerView.layoutManager = layoutManager
             characterListRecyclerView.adapter = adapter

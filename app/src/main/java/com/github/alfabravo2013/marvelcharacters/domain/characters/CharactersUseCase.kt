@@ -1,47 +1,54 @@
 package com.github.alfabravo2013.marvelcharacters.domain.characters
 
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
-import com.github.alfabravo2013.marvelcharacters.domain.characters.CharactersRepository.Filter
+import com.github.alfabravo2013.marvelcharacters.domain.filters.Filters
 import com.github.alfabravo2013.marvelcharacters.utils.DEFAULT_PAGE_SIZE
 
 class CharactersUseCase(private val charactersRepository: CharactersRepository) {
-    private val nameMatcher = "[A-Za-z\\s]+".toRegex()
+    private val filters: MutableSet<Filters> = mutableSetOf()
 
-    fun updateQueryText(text: String?): Boolean {
-        if (text.isNullOrBlank() || !text.matches(nameMatcher)) {
+    fun updateQueryText(text: String?): String {
+        if (text.isNullOrBlank()) {
             charactersRepository.updateQueryText("")
-            return false
+            return ""
         }
 
         charactersRepository.updateQueryText(text)
-        return true
+        return text
     }
 
     suspend fun getNextPage(): CharactersItemPage {
-        return charactersRepository.getNextPage(DEFAULT_PAGE_SIZE)
+        charactersRepository.requestNextPage(DEFAULT_PAGE_SIZE)
+        return charactersRepository.getCurrentPages(filters)
     }
 
     suspend fun getPrevPage(): CharactersItemPage {
-        return charactersRepository.getPrevPage(DEFAULT_PAGE_SIZE)
+        charactersRepository.requestPrevPage(DEFAULT_PAGE_SIZE)
+        return charactersRepository.getCurrentPages(filters)
     }
 
     suspend fun getFirstPage(): CharactersItemPage {
-        return charactersRepository.getFirstPage(DEFAULT_PAGE_SIZE)
+        charactersRepository.requestFirstPage(DEFAULT_PAGE_SIZE)
+        return charactersRepository.getCurrentPages(filters)
+    }
+
+    fun getCurrentPages(): CharactersItemPage {
+        return charactersRepository.getCurrentPages(filters)
     }
 
     fun addWithImageFilter() {
-        charactersRepository.addFilter(Filter.HasImage)
+        filters.add(Filters.HasImage)
     }
 
     fun removeWithImageFilter() {
-        charactersRepository.removeFilter(Filter.HasImage)
+        filters.remove(Filters.HasImage)
     }
 
     fun addWithDescriptionFilter() {
-        charactersRepository.addFilter(Filter.HasDescription)
+        filters.add(Filters.HasDescription)
     }
 
     fun removeWithDescriptionFilter() {
-        charactersRepository.removeFilter(Filter.HasDescription)
+        filters.remove(Filters.HasDescription)
     }
 }

@@ -41,12 +41,7 @@ class CharacterListAdapter(
 
     override fun getItemId(position: Int): Long = getItem(position).id.toLong()
 
-    fun addPrevPage(page: CharactersItemPage) {
-        updatePageStatus(page)
-        submitList(page.characters)
-    }
-
-    fun addNextPage(page: CharactersItemPage) {
+    fun submitPage(page: CharactersItemPage) {
         updatePageStatus(page)
         submitList(page.characters)
     }

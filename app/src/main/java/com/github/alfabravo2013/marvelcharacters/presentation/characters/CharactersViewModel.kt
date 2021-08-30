@@ -24,14 +24,18 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     val screenState: LiveData<CharactersScreenState> get() = _screenState
 
     init {
-        getCharactersPage(PAGE.FIRST)
+        // TODO: 30.08.2021 decide on if the view state should survive
+        // FIXME: 30.08.2021 current page is not displayed on configuration change,
+        //  consider using a separate LiveData object to observe current pages in View
         _screenState.value = CharactersScreenState()
+        updateQueryText("")
+        getCharactersPage(PAGE.FIRST)
     }
 
     fun updateQueryText(text: String?): Boolean {
-        // TODO: 29.08.2021 store the SearchView state to avoid collapsed and empty search text
-        //  while a search filter is applied
-        return charactersUseCase.updateQueryText(text)
+        val result = charactersUseCase.updateQueryText(text)
+        _screenState.value = _screenState.value?.copy(searchQuery = result)
+        return result.isNotEmpty()
     }
 
     fun onToggleUniqueNamesFilter() {
@@ -76,6 +80,7 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         runCatching {
             withContext(Dispatchers.IO) {
                 when (requestedPage) {
+                    PAGE.CURRENT -> charactersUseCase.getCurrentPages()
                     PAGE.NEXT -> charactersUseCase.getNextPage()
                     PAGE.FIRST -> {
                         _onEvent.postValue(OnEvent.CleanList)
@@ -85,11 +90,7 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
                 }
             }
         }.onSuccess { fetchedPage ->
-            when (requestedPage) {
-                PAGE.NEXT -> _onEvent.value = OnEvent.NextPage(fetchedPage)
-                PAGE.FIRST -> _onEvent.value = OnEvent.NextPage(fetchedPage)
-                PAGE.PREVIOUS -> _onEvent.value = OnEvent.PrevPage(fetchedPage)
-            }
+            _onEvent.value = OnEvent.SubmitPage(fetchedPage)
         }.onFailure { error ->
             showError(error)
         }
@@ -113,9 +114,8 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         object HideLoading : OnEvent()
         object CleanList : OnEvent()
         data class ShowError(val errorId: Int) : OnEvent()
-        data class NextPage(val data: CharactersItemPage) : OnEvent()
-        data class PrevPage(val data: CharactersItemPage) : OnEvent()
+        data class SubmitPage(val data: CharactersItemPage) : OnEvent()
     }
 
-    enum class PAGE { NEXT, FIRST, PREVIOUS }
+    enum class PAGE { CURRENT, NEXT, FIRST, PREVIOUS }
 }
