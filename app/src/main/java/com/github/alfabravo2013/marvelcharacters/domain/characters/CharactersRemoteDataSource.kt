@@ -49,7 +49,7 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
                     prevOffset = if (currentOffset == 0) {
                         null
                     } else (currentOffset - pageSize).coerceAtLeast(0),
-                    nextOffset = if (response.data.count < pageSize) {
+                    nextOffset = if (response.data.count < pageSize || currentOffset >= total) {
                         null
                     } else {
                         currentOffset + pageSize

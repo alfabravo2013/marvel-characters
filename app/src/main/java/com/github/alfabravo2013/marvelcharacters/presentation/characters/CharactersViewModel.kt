@@ -25,8 +25,6 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
 
     init {
         // TODO: 30.08.2021 decide on if the view state should survive
-        // FIXME: 30.08.2021 current page is not displayed on configuration change,
-        //  consider using a separate LiveData object to observe current pages in View
         _screenState.value = CharactersScreenState()
         updateQueryText("")
         getCharactersPage(PAGE.FIRST)
@@ -41,6 +39,10 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     fun onToggleUniqueNamesFilter() {
         // TODO: 29.08.2021 add this feature
         _onEvent.value = OnEvent.ShowError(R.string.not_implemented)
+    }
+
+    fun rememberScrollPosition(position: Int) {
+        _screenState.value = _screenState.value?.copy(scrollPosition = position)
     }
 
     fun onToggleWithImageFilter() {

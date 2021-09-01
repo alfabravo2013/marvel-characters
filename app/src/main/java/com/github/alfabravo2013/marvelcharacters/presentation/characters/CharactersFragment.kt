@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.github.alfabravo2013.marvelcharacters.MainActivity
 import com.github.alfabravo2013.marvelcharacters.R
 import com.github.alfabravo2013.marvelcharacters.databinding.FragmentCharactersBinding
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.CharactersViewModel.OnEvent
@@ -59,6 +60,8 @@ class CharactersFragment : Fragment() {
         setupRecyclerView()
         setHasOptionsMenu(true)
 
+        (activity as MainActivity).setTitle(getString(R.string.characters_screen_title))
+
         binding.charactersRetryButton.setOnClickListener {
             it.visibility = View.GONE
             viewModel.getCharactersPage(PAGE.FIRST)
@@ -94,12 +97,21 @@ class CharactersFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.getCharactersPage(PAGE.CURRENT)
+        val position = viewModel.screenState.value?.scrollPosition ?: 0
+        binding.characterListRecyclerView.smoothScrollToPosition(position)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        rememberScrollPosition()
         _binding = null
         searchView.setOnQueryTextListener(null)
+    }
+
+    private fun rememberScrollPosition() {
+        val layoutManager = binding.characterListRecyclerView.layoutManager as GridLayoutManager
+        val position = layoutManager.findFirstVisibleItemPosition()
+        viewModel.rememberScrollPosition(position)
     }
 
     private fun setupMenuStateObserver(menu: Menu) {
@@ -126,7 +138,7 @@ class CharactersFragment : Fragment() {
             }
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                viewModel.getCharactersPage(PAGE.FIRST)
+                viewModel.getCharactersPage(PAGE.CURRENT)
                 return true
             }
         })
@@ -163,6 +175,7 @@ class CharactersFragment : Fragment() {
         binding.apply {
             characterListRecyclerView.layoutManager = layoutManager
             characterListRecyclerView.adapter = adapter
+            characterListRecyclerView.setHasFixedSize(true)
         }
     }
 

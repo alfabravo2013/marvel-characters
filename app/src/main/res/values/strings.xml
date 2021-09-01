@@ -1,9 +1,13 @@
 <resources>
-    <string name="app_name">MarvelCharacters</string>
+    <string name="app_name">Marvel Characters</string>
 
 <!--    Characters screen -->
+    <string name="characters_screen_title">Characters</string>
     <string name="characters_load_state_error_text">Failed to load characters.</string>
     <string name="retry_button_text">Retry</string>
+
+<!--    Detail screen -->
+    <string name="detail_screen_title">Character information</string>
 
 <!--    API errors -->
     <string name="character_not_found">Character not found</string>
@@ -13,7 +17,7 @@
 <!--    Filters -->
     <string name="search">Search</string>
     <string name="characters_search_query_hint_text">Type the character name</string>
-    <string name="filter_unique">Unique names</string>
+    <string name="filter_unique">Hide variants</string>
     <string name="filter_with_images">With images</string>
     <string name="filter_with_descriptions">With descriptions</string>
 
