@@ -56,7 +56,7 @@
                 app:layout_constraintBottom_toTopOf="@id/detail_name"
                 android:layout_marginBottom="@dimen/padding_base"
                 android:layout_marginEnd="@dimen/padding_base"
-                android:src="@drawable/ic_bookmark"
+                android:src="@drawable/ic_bookmark_add"
                 tools:ignore="ContentDescription" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

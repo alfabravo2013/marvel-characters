@@ -16,7 +16,7 @@ fun MarvelCharacter.toCharacterListItem(): CharactersItem {
     )
 }
 
-fun MarvelCharacter.toDetail(): Detail {
+fun MarvelCharacter.toDetail(bookmarked: Boolean = false): Detail {
     return Detail(
         name = name,
         description = if (description.isEmpty()) {
