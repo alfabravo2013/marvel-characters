@@ -19,7 +19,8 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
     }
 
     suspend fun getPrevPage(pageSize: Int): MarvelCharacterPage {
-        return getCharactersPage(currentOffset - pageSize, pageSize)
+        val adjustedSize = if (currentOffset - pageSize < 0) currentOffset else pageSize
+        return getCharactersPage(currentOffset - pageSize, adjustedSize)
     }
 
     suspend fun getFirstPage(pageSize: Int): MarvelCharacterPage {
@@ -29,14 +30,14 @@ class CharactersRemoteDataSource(private val marvelApi: MarvelApi) {
     private suspend fun getCharactersPage(offset: Int, pageSize: Int): MarvelCharacterPage {
         val response = if (queryText.isNotBlank()) {
             marvelApi.getCharactersPage(
-                offset = offset,
-                limit = pageSize.coerceIn(1..MAX_PAGE_SIZE),
+                offset = offset.coerceAtLeast(0),
+                limit = pageSize.coerceIn(0..MAX_PAGE_SIZE),
                 name = queryText
             )
         } else {
             marvelApi.getCharactersPage(
-                offset = offset,
-                limit = pageSize.coerceIn(1..MAX_PAGE_SIZE)
+                offset = offset.coerceAtLeast(0),
+                limit = pageSize.coerceIn(0..MAX_PAGE_SIZE)
             )
         }
 

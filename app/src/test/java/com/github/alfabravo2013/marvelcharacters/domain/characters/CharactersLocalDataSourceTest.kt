@@ -12,13 +12,15 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.fail
+import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
 @ExtendWith(InstantExecutorExtension::class, CoroutinesTestExtension::class)
@@ -53,34 +55,52 @@ internal class CharactersLocalDataSourceTest {
         data = firstPageContainer
     )
 
+    private val secondPageContainer = firstPageContainer.copy(offset = pageSize)
+    private val secondPageWrapper = firstPageWrapper.copy(data = secondPageContainer)
+
+    private val badResponse = CharacterDataWrapper(
+        code = 409,
+        status = "bad",
+        data = CharacterDataContainer(
+            offset = 0,
+            limit = pageSize,
+            total = total,
+            count = 0,
+            results = emptyList()
+        )
+    )
+
+    @BeforeEach
+    fun setup() {
+        coEvery {
+            marvelApi.getCharactersPage(or(less(0), more(total)), any())
+        } returns badResponse
+    }
+
     @Nested
-    @DisplayName("When request any page")
+    @DisplayName("When requesting any page")
     inner class ApiMethodCallsTests {
         @Test
         @DisplayName("Given queryText is empty, then api called without query")
         fun requestPageNoQuery() = runBlocking {
-            coEvery { marvelApi.getCharactersPage(0, 20) } returns firstPageWrapper
+            coEvery { marvelApi.getCharactersPage(0, pageSize) } returns firstPageWrapper
 
-            charactersRemoteDataSource.getFirstPage(20)
+            charactersRemoteDataSource.getFirstPage(pageSize)
 
-            coVerify(exactly = 1) {
-                marvelApi.getCharactersPage(0, 20)
-            }
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(0, pageSize) }
         }
 
         @Test
         @DisplayName("Given queryText is not empty, then api called with query")
         fun requestPageWithQuery() = runBlocking {
             coEvery {
-                marvelApi.getCharactersPage(0, 20, "query")
+                marvelApi.getCharactersPage(0, pageSize, "query")
             } returns firstPageWrapper
 
             charactersRemoteDataSource.updateQueryText("query")
-            charactersRemoteDataSource.getFirstPage(20)
+            charactersRemoteDataSource.getFirstPage(pageSize)
 
-            coVerify(exactly = 1) {
-                marvelApi.getCharactersPage(0, 20, "query")
-            }
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(0, pageSize, "query") }
         }
     }
 
@@ -89,226 +109,269 @@ internal class CharactersLocalDataSourceTest {
     inner class FirstPageTests {
 
         @Test
-        @DisplayName("Given pageSize == 2, then return list of two")
+        @DisplayName("Given pageSize == 2, then return list.size == 2")
         fun requestFirstPageListSize() = runBlocking {
-            coEvery {
-                marvelApi.getCharactersPage(0, pageSize)
-            } returns firstPageWrapper
+            coEvery { marvelApi.getCharactersPage(0, pageSize) } returns firstPageWrapper
 
             val result = charactersRemoteDataSource.getFirstPage(pageSize)
 
             assertEquals(pageResults.size, result.characters.size)
 
-            coVerify(exactly = 1) {
-                marvelApi.getCharactersPage(0, pageSize)
-            }
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(0, pageSize) }
         }
 
         @Test
         @DisplayName("Given any offset, then prevOffset is null")
         fun requestFirstPagePrevOffset() = runBlocking {
-            coEvery {
-                marvelApi.getCharactersPage(0, pageSize)
-            } returns firstPageWrapper
+            coEvery { marvelApi.getCharactersPage(0, pageSize) } returns firstPageWrapper
 
             val result = charactersRemoteDataSource.getFirstPage(pageSize)
 
             assertNull(result.prevOffset)
 
-            coVerify(exactly = 1) {
-                marvelApi.getCharactersPage(0, pageSize)
-            }
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(0, pageSize) }
         }
 
         @Test
         @DisplayName("Given any offset, then nextOffset == pageSize")
         fun requestFirstPageNextOffset() = runBlocking {
-            coEvery {
-                marvelApi.getCharactersPage(0, pageSize)
-            } returns firstPageWrapper
+            coEvery { marvelApi.getCharactersPage(0, pageSize) } returns firstPageWrapper
 
             val result = charactersRemoteDataSource.getFirstPage(pageSize)
 
             assertEquals(pageSize, result.nextOffset)
 
-            coVerify(exactly = 1) {
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(0, pageSize) }
+        }
+
+        @Test
+        @DisplayName("Given results.size < pageSize, then nextOffset is null")
+        fun requestFirstPagePartialList() = runBlocking {
+            coEvery {
                 marvelApi.getCharactersPage(0, pageSize)
-            }
+            } returns firstPageWrapper.copy(
+                data = firstPageContainer.copy(
+                    count = partialResults.size,
+                    total = 3,
+                    results = partialResults
+                )
+            )
+
+            val result = charactersRemoteDataSource.getFirstPage(pageSize)
+
+            assertEquals(partialResults.size, result.characters.size)
+            assertNull(result.nextOffset)
+
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(0, pageSize) }
+        }
+
+        @Test
+        @DisplayName("Given results.size == total, then nextOffset is null")
+        fun requestFirstPageAllFetched() = runBlocking {
+            coEvery {
+                marvelApi.getCharactersPage(0, pageSize * 2)
+            } returns firstPageWrapper.copy(
+                data = firstPageContainer.copy(results = pageResults + pageResults)
+            )
+
+            val result = charactersRemoteDataSource.getFirstPage(pageSize * 2)
+
+            assertEquals(total, result.characters.size)
+            assertNull(result.nextOffset)
+
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(0, pageSize * 2) }
         }
     }
 
     @Nested
     @DisplayName("When requesting next page")
     inner class NextPageTests {
-        private val secondPageContainer = firstPageContainer.copy(offset = pageSize)
-        private val secondPageWrapper = firstPageWrapper.copy(data = secondPageContainer)
 
         @Test
-        @DisplayName("Given pageSize == 2, then return page of two")
+        @DisplayName("Given pageSize == 2, then return page.size == 2")
         fun requestSecondPageListSize() = runBlocking {
-            coEvery {
-                marvelApi.getCharactersPage(pageSize, pageSize)
-            } returns secondPageWrapper
+            coEvery { marvelApi.getCharactersPage(pageSize, pageSize) } returns secondPageWrapper
 
             val result = charactersRemoteDataSource.getNextPage(pageSize)
 
-            assertEquals(pageResults.size, result.characters.size)
+            assertEquals(pageSize, result.characters.size)
 
-            coVerify(exactly = 1) {
-                marvelApi.getCharactersPage(pageSize, pageSize)
-            }
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(pageSize, pageSize) }
         }
 
         @Test
         @DisplayName("Given offset == 0, then prevOffset == 0")
         fun requestSecondPagePrevOffset() = runBlocking {
-            coEvery {
-                marvelApi.getCharactersPage(pageSize, pageSize)
-            } returns secondPageWrapper
+            coEvery { marvelApi.getCharactersPage(pageSize, pageSize) } returns secondPageWrapper
 
             val result = charactersRemoteDataSource.getNextPage(pageSize)
 
             assertEquals(0, result.prevOffset)
 
-            coVerify(exactly = 1) {
-                marvelApi.getCharactersPage(pageSize, pageSize)
-            }
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(pageSize, pageSize) }
         }
 
         @Test
         @DisplayName("Given offset == 0, then nextOffset == pageSize * 2")
         fun requestSecondPageNextOffset() = runBlocking {
-            coEvery {
-                marvelApi.getCharactersPage(pageSize, pageSize)
-            } returns secondPageWrapper
+            coEvery { marvelApi.getCharactersPage(pageSize, pageSize) } returns secondPageWrapper
 
             val result = charactersRemoteDataSource.getNextPage(pageSize)
 
             assertEquals(pageSize * 2, result.nextOffset)
 
-            coVerify(exactly = 1) {
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(pageSize, pageSize) }
+        }
+
+        @Test
+        @DisplayName("Given results.size < pageSize, then nextOffset is null")
+        fun requestSecondPagePartialList() = runBlocking {
+            coEvery {
                 marvelApi.getCharactersPage(pageSize, pageSize)
-            }
+            } returns secondPageWrapper.copy(
+                data = secondPageContainer.copy(
+                    count = partialResults.size,
+                    total = 3,
+                    results = partialResults
+                )
+            )
+
+            val result = charactersRemoteDataSource.getNextPage(pageSize)
+
+            assertTrue(result.characters.size < pageSize)
+            assertEquals(partialResults.size, result.characters.size)
+            assertNull(result.nextOffset)
+
+            coVerify(exactly = 1) { marvelApi.getCharactersPage(pageSize, pageSize) }
+        }
+
+        @Test
+        @DisplayName("Given offset + pageSize > total, then nextOffset is null")
+        fun requestSecondPageBeyondTotal() = runBlocking {
+            val total = 3
+            coEvery {
+                marvelApi.getCharactersPage(total - 1, pageSize)
+            } returns secondPageWrapper.copy(
+                data = secondPageContainer.copy(
+                    offset = total,
+                    limit = pageSize,
+                    total = total,
+                    count = partialResults.size,
+                    results = partialResults
+                )
+            )
+
+            val result = charactersRemoteDataSource.getNextPage(pageSize)
+
+            assertEquals(partialResults.size, result.characters.size)
+            assertNull(result.nextOffset)
+            assertEquals(total - pageSize, result.prevOffset)
+
+            coVerify { marvelApi.getCharactersPage(total - 1, pageSize) }
         }
     }
 
     @Nested
     @DisplayName("When requesting previous page")
     inner class PrevPageTests {
-        private val secondPageContainer = firstPageContainer.copy(offset = pageSize)
-        private val secondPageWrapper = firstPageWrapper.copy(data = secondPageContainer)
-        private val lastPageContainer = firstPageContainer.copy(offset = total)
-        private val lastPageWrapper = firstPageWrapper.copy(data = lastPageContainer)
 
         @Test
-        @DisplayName("Given offset == 0, return empty list")
-        fun test() {
-            fail("not implemented")
+        @DisplayName("Given offset == 0, then return empty list")
+        fun requestPrevPageFromOffsetZero() = runBlocking {
+            coEvery {
+                marvelApi.getCharactersPage(range(0, total), less(1))
+            } returns badResponse
+
+            assertThrows<MarvelApi.BadRequestException> {
+                charactersRemoteDataSource.getPrevPage(pageSize)
+            }
+
+            coVerify { marvelApi.getCharactersPage(0, 0) }
         }
 
         @Test
-        @DisplayName("Given offset == 1 and pageSize == 2, return list of one")
-        fun test2() {
-            fail("not implemented")
+        @DisplayName("Given offset == 3 and pageSize == 4, return list.size == 3")
+        fun requestPrevPageFromOffsetOne() = runBlocking {
+            coEvery { marvelApi.getCharactersPage(1, 1) } returns secondPageWrapper.copy(
+                data = CharacterDataContainer(
+                    offset = 1,
+                    limit = 1,
+                    total = 4,
+                    count = 1,
+                    results = partialResults
+                )
+            )
+            coEvery { marvelApi.getCharactersPage(0, 1) } returns firstPageWrapper.copy(
+                data = CharacterDataContainer(
+                    offset = 0,
+                    limit = 1,
+                    total = 4,
+                    count = 1,
+                    results = partialResults
+                )
+            )
+
+            charactersRemoteDataSource.getNextPage(1)
+            val result = charactersRemoteDataSource.getPrevPage(pageSize)
+
+            assertEquals(partialResults.size, result.characters.size)
+            assertNull(result.prevOffset)
+            assertEquals(1, result.nextOffset)
+
+            coVerify(exactly = 1) {
+                marvelApi.getCharactersPage(1, 1)
+                marvelApi.getCharactersPage(0, 1)
+            }
         }
 
         @Test
         @DisplayName("Given offset == 2 and pageSize == 2, return list of two")
-        fun test3() {
-            fail("not implemented")
+        fun requestPreviousPageAfterNextPage() = runBlocking {
+            coEvery { marvelApi.getCharactersPage(2, pageSize) } returns secondPageWrapper
+            coEvery { marvelApi.getCharactersPage(0, pageSize) } returns firstPageWrapper
+
+            charactersRemoteDataSource.getNextPage(pageSize)
+            val result = charactersRemoteDataSource.getPrevPage(pageSize)
+
+            assertEquals(pageSize, result.characters.size)
+            assertNull(result.prevOffset)
+            assertEquals(result.nextOffset, pageSize)
+
+            coVerify(exactly = 1) {
+                marvelApi.getCharactersPage(2, pageSize)
+                marvelApi.getCharactersPage(0, pageSize)
+            }
         }
     }
 
     @Nested
-    @DisplayName("When requesting last page")
-    inner class LastPageTests {
-        // FIXME: 01.09.2021 carefully check api responses for edge cases
-        private val lastPageContainer = firstPageContainer.copy(offset = total - pageSize)
-        private val lastPageWrapper = firstPageWrapper.copy(data = lastPageContainer)
+    @DisplayName("Bad responses")
+    inner class BadResponseTests {
 
         @Test
-        @DisplayName("Given pageSize == 2 and offset == total - pageSize, then return list of two")
-        fun requestLastPage() = runBlocking {
-            coEvery {
-                marvelApi.getCharactersPage(any(), pageSize)
-            } returns lastPageWrapper
+        @DisplayName("Given code 409, then throw MarvelApi.BadRequestException")
+        fun badRequestTest() = runBlocking {
+            coEvery { marvelApi.getCharactersPage(any(), any()) } returns badResponse
 
-            val result = charactersRemoteDataSource.getNextPage(pageSize)
-
-            assertEquals(pageResults.size, result.characters.size)
-
-            coVerify {
-                marvelApi.getCharactersPage(any(), pageSize)
+            assertThrows<MarvelApi.BadRequestException> {
+                charactersRemoteDataSource.getFirstPage(pageSize)
             }
+
+            coVerify { marvelApi.getCharactersPage(0, pageSize) }
         }
 
         @Test
-        @DisplayName("Given offset == total, then return empty list")
-        fun test() {
-            fail("not implemented")
-        }
-
-        @Test
-        @DisplayName("Given offset == total - 1 and pageSize == 2, then return list of one")
-        fun test2() {
-            fail("not implemented")
-        }
-
-        @Test
-        @DisplayName("Given offset == total - pageSize, then prevOffset == total - pageSize")
-        fun requestLastPagePrevOffset() = runBlocking {
+        @DisplayName("Given code is not 200 or 409, then throw MarvelApi.ApiException")
+        fun apiErrorTest() = runBlocking {
             coEvery {
-                marvelApi.getCharactersPage(any(), pageSize)
-            } returns lastPageWrapper
+                marvelApi.getCharactersPage(any(), any())
+            } returns badResponse.copy(code = 500)
 
-            val result = charactersRemoteDataSource.getNextPage(pageSize)
-
-            assertEquals(pageResults.size, result.characters.size)
-            assertEquals(total - pageSize, result.prevOffset)
-
-            coVerify {
-                marvelApi.getCharactersPage(any(), pageSize)
+            assertThrows<MarvelApi.ApiException> {
+                charactersRemoteDataSource.getFirstPage(pageSize)
             }
-        }
 
-        @Test
-        @DisplayName("Given offset == total - pageSize, then nextOffset is null")
-        fun requestLastPageNextOffset() = runBlocking {
-            coEvery {
-                marvelApi.getCharactersPage(any(), pageSize)
-            } returns lastPageWrapper
-
-            val result = charactersRemoteDataSource.getNextPage(pageSize)
-
-            assertNull(result.nextOffset)
-
-            coVerify {
-                marvelApi.getCharactersPage(any(), pageSize)
-            }
-        }
-
-        @Test
-        @DisplayName("Given result.size < pageSize, then nextOffset is null")
-        fun requestLastPageNearEnd() = runBlocking {
-            val results = listOf(marvelCharacter)
-            val partialListContainer = firstPageContainer.copy(
-                offset = total - pageSize + 1,
-                count = results.size,
-                results = results
-            )
-            val partialListWrapper = firstPageWrapper.copy(data = partialListContainer)
-
-            coEvery {
-                marvelApi.getCharactersPage(any(), pageSize)
-            } returns partialListWrapper
-
-            val result = charactersRemoteDataSource.getNextPage(pageSize)
-
-            assertNull(result.nextOffset)
-
-            coVerify {
-                marvelApi.getCharactersPage(any(), pageSize)
-            }
+            coVerify { marvelApi.getCharactersPage(0, pageSize) }
         }
     }
 }
