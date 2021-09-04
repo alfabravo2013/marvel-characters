@@ -8,7 +8,7 @@ import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.github.alfabravo2013.marvelcharacters.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-    val binding: ActivityMainBinding by lazy {
+    private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
@@ -18,7 +18,10 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.activityMainToolbar)
         setupToolbar()
-        binding.activityMainToolbar.title = ""
+    }
+
+    fun setTitle(title: String) {
+        supportActionBar?.title = title
     }
 
     private fun setupToolbar() {
