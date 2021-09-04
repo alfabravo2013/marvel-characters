@@ -138,7 +138,8 @@ class CharactersFragment : Fragment() {
             }
 
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                viewModel.getCharactersPage(PAGE.CURRENT)
+                viewModel.updateQueryText("")
+                viewModel.getCharactersPage(PAGE.FIRST)
                 return true
             }
         })

@@ -1,7 +1,7 @@
 package com.github.alfabravo2013.marvelcharacters.domain.characters
 
-import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
 import com.github.alfabravo2013.marvelcharacters.domain.filters.Filters
+import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
 import com.github.alfabravo2013.marvelcharacters.utils.DEFAULT_PAGE_SIZE
 
 class CharactersUseCase(private val charactersRepository: CharactersRepository) {
@@ -18,8 +18,24 @@ class CharactersUseCase(private val charactersRepository: CharactersRepository) 
     }
 
     suspend fun getNextPage(): CharactersItemPage {
-        charactersRepository.requestNextPage(DEFAULT_PAGE_SIZE)
-        return charactersRepository.getCurrentPages(filters)
+        // FIXME: 04.09.2021 when both filters are on, no further paging is at k or m letter,
+        //  add onScroll listener to attempt scroll further
+        var page: CharactersItemPage
+        var count = 0
+
+        while (true) {
+            charactersRepository.requestNextPage(DEFAULT_PAGE_SIZE)
+            page = charactersRepository.getCurrentPages(filters)
+            if (page.characters.size - count < 8 && page.nextOffset != null) {
+                count += page.characters.size
+                continue
+            }
+
+            count += page.characters.size
+            break
+        }
+
+        return page
     }
 
     suspend fun getPrevPage(): CharactersItemPage {
