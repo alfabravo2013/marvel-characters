@@ -18,7 +18,7 @@
             <ImageView
                 android:id="@+id/detail_image"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="400dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -47,6 +47,17 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 tools:text="@tools:sample/lorem/random" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/detail_fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/detail_name"
+                android:layout_marginBottom="@dimen/padding_base"
+                android:layout_marginEnd="@dimen/padding_base"
+                android:src="@drawable/ic_bookmark"
+                tools:ignore="ContentDescription" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

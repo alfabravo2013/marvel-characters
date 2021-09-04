@@ -97,21 +97,12 @@ class CharactersFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.getCharactersPage(PAGE.CURRENT)
-        val position = viewModel.screenState.value?.scrollPosition ?: 0
-        binding.characterListRecyclerView.smoothScrollToPosition(position)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        rememberScrollPosition()
         _binding = null
         searchView.setOnQueryTextListener(null)
-    }
-
-    private fun rememberScrollPosition() {
-        val layoutManager = binding.characterListRecyclerView.layoutManager as GridLayoutManager
-        val position = layoutManager.findFirstVisibleItemPosition()
-        viewModel.rememberScrollPosition(position)
     }
 
     private fun setupMenuStateObserver(menu: Menu) {
