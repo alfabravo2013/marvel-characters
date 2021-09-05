@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlinx-serialization'
     id 'androidx.navigation.safeargs'
+    id 'kotlin-kapt'
 }
 
 def apikeyProperties = new Properties()
@@ -80,6 +81,11 @@ dependencies {
 
     // Kotlin serialization
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+
+    // Room
+    implementation 'androidx.room:room-runtime:2.3.0'
+    kapt 'androidx.room:room-compiler:2.3.0'
+    implementation 'androidx.room:room-ktx:2.3.0'
 
     // Mockk
     testImplementation "io.mockk:mockk:1.12.0"

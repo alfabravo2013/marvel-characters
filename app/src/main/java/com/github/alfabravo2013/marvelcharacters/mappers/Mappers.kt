@@ -1,6 +1,7 @@
 package com.github.alfabravo2013.marvelcharacters.mappers
 
 import com.github.alfabravo2013.marvelcharacters.domain.characters.models.MarvelCharacterPage
+import com.github.alfabravo2013.marvelcharacters.localstorage.entities.MarvelCharacterEntity
 import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem
@@ -12,11 +13,12 @@ fun MarvelCharacter.toCharacterListItem(): CharactersItem {
     return CharactersItem(
         id = id,
         name = name,
-        imageUrl = thumbnail.toString()
+        imageUrl = thumbnail.toString(),
+        bookmarked = false, // FIXME: 05.09.2021 remove once CharactersLocalDataSource refactored to use entity
     )
 }
 
-fun MarvelCharacter.toDetail(): Detail {
+fun MarvelCharacter.toDetail(bookmarked: Boolean = false): Detail {
     return Detail(
         name = name,
         description = if (description.isEmpty()) {
@@ -25,6 +27,38 @@ fun MarvelCharacter.toDetail(): Detail {
             description
         },
         imageUrl = thumbnail.toString()
+    )
+}
+
+fun MarvelCharacter.toEntity(bookmarked: Boolean = false): MarvelCharacterEntity {
+    return MarvelCharacterEntity(
+        id = id,
+        name = name,
+        description = if (description.isEmpty()) {
+            "Description not available"
+        } else {
+            description
+        },
+        imageUrl = thumbnail.toString(),
+        bookmarked = bookmarked,
+    )
+}
+
+fun MarvelCharacterEntity.toDetail(): Detail {
+    return Detail(
+        name = name,
+        description = description,
+        imageUrl = imageUrl,
+        bookmarked = bookmarked,
+    )
+}
+
+fun MarvelCharacterEntity.toCharacterItem(): CharactersItem {
+    return CharactersItem(
+        id = id,
+        name = name,
+        imageUrl = imageUrl,
+        bookmarked = bookmarked,
     )
 }
 

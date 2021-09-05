@@ -24,7 +24,6 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     val screenState: LiveData<CharactersScreenState> get() = _screenState
 
     init {
-        // TODO: 30.08.2021 decide on if the view state should survive
         _screenState.value = CharactersScreenState()
         updateQueryText("")
         getCharactersPage(PAGE.FIRST)
@@ -39,10 +38,6 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
     fun onToggleUniqueNamesFilter() {
         // TODO: 29.08.2021 add this feature
         _onEvent.value = OnEvent.ShowError(R.string.not_implemented)
-    }
-
-    fun rememberScrollPosition(position: Int) {
-        _screenState.value = _screenState.value?.copy(scrollPosition = position)
     }
 
     fun onToggleWithImageFilter() {
@@ -69,6 +64,20 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         }
 
         getCharactersPage(PAGE.FIRST)
+    }
+
+    fun onToggleFavoritesFilter() {
+        val isChecked = _screenState.value?.favoritesFilterOn?.not() ?: true
+        _screenState.value = _screenState.value?.copy(favoritesFilterOn = isChecked)
+
+        if (isChecked) {
+            viewModelScope.launch {
+                val bookmarked = withContext(Dispatchers.IO) { charactersUseCase.getBookmarked() }
+                _onEvent.value = OnEvent.SubmitPage(bookmarked)
+            }
+        } else {
+            getCharactersPage(PAGE.CURRENT)
+        }
     }
 
     fun getCharactersPage(requestedPage: PAGE) = viewModelScope.launch {

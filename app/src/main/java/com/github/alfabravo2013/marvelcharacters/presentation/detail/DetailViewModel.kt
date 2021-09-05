@@ -32,20 +32,38 @@ class DetailViewModel(
         }
 
         _onEvent.value = OnEvent.HideLoading
+        _onEvent.value = OnEvent.BookmarkStatus(detailUseCase.isBookmarked())
+    }
+
+    fun onBookmarkClick() = viewModelScope.launch {
+        kotlin.runCatching {
+            detailUseCase.switchBookmarkedStatus()
+        }.onSuccess { bookmarked ->
+            _onEvent.value = OnEvent.BookmarkStatus(bookmarked)
+            val messageId = if (bookmarked) {
+                R.string.detail_bookmark_added
+            } else {
+                R.string.detail_bookmark_removed
+            }
+            _onEvent.value = OnEvent.Message(messageId)
+        }.onFailure {
+            _onEvent.value = OnEvent.Message(R.string.detail_bookmark_error)
+        }
     }
 
     private fun showError(ex: Throwable) {
         when (ex) {
             is MarvelApi.NotFoundException -> _onEvent.value =
-                OnEvent.Error(R.string.character_not_found)
-            else -> _onEvent.value = OnEvent.Error(R.string.unknown_error)
+                OnEvent.Message(R.string.character_not_found)
+            else -> _onEvent.value = OnEvent.Message(R.string.unknown_error)
         }
     }
 
     sealed class OnEvent {
         object ShowLoading : OnEvent()
         object HideLoading : OnEvent()
+        data class BookmarkStatus(val bookmarked: Boolean) : OnEvent()
         data class ShowDetail(val detail: Detail) : OnEvent()
-        data class Error(val errorId: Int) : OnEvent()
+        data class Message(val messageId: Int) : OnEvent()
     }
 }

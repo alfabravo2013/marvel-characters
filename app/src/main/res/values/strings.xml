@@ -8,6 +8,9 @@
 
 <!--    Detail screen -->
     <string name="detail_screen_title">Character information</string>
+    <string name="detail_bookmark_error">Failed to bookmark</string>
+    <string name="detail_bookmark_added">The character has been bookmarked</string>
+    <string name="detail_bookmark_removed">The character has been removed from bookmarks</string>
 
 <!--    API errors -->
     <string name="character_not_found">Character not found</string>
@@ -23,4 +26,5 @@
 
 <!--    Stub message -->
     <string name="not_implemented">This feature is not implemented yet</string>
+    <string name="filter_favorites">Favorites</string>
 </resources>

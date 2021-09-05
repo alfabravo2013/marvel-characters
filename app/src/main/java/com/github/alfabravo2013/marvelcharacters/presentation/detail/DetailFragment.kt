@@ -24,13 +24,21 @@ class DetailFragment : Fragment() {
 
     private val observer = Observer<OnEvent> { event ->
         when (event) {
-            is OnEvent.ShowLoading -> binding.detailProgressBar.visibility = View.VISIBLE
+            is OnEvent.ShowLoading -> {
+                binding.detailProgressBar.visibility = View.VISIBLE
+                binding.detailFab.visibility = View.GONE
+            }
             is OnEvent.HideLoading -> binding.detailProgressBar.visibility = View.GONE
-            is OnEvent.Error -> Toast.makeText(
+            is OnEvent.Message -> Toast.makeText(
                 activity,
-                getString(event.errorId),
-                Toast.LENGTH_LONG).show()
-            is OnEvent.ShowDetail -> bindElements(event.detail)
+                getString(event.messageId),
+                Toast.LENGTH_LONG
+            ).show()
+            is OnEvent.ShowDetail -> {
+                bindElements(event.detail)
+                binding.detailFab.visibility = View.VISIBLE
+            }
+            is OnEvent.BookmarkStatus -> setFabImage(event.bookmarked)
         }
     }
 
@@ -49,6 +57,11 @@ class DetailFragment : Fragment() {
         viewModel.onEvent.observe(viewLifecycleOwner, observer)
 
         val characterId = DetailFragmentArgs.fromBundle(requireArguments()).characterId
+
+        binding.detailFab.setOnClickListener {
+            viewModel.onBookmarkClick()
+        }
+
         viewModel.getDetail(characterId)
     }
 
@@ -66,5 +79,14 @@ class DetailFragment : Fragment() {
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(detailImage)
         }
+    }
+
+    private fun setFabImage(bookmarked: Boolean) {
+        val imgResource = if (bookmarked) {
+            R.drawable.ic_bookmark_remove
+        } else {
+            R.drawable.ic_bookmark_add
+        }
+        binding.detailFab.setImageResource(imgResource)
     }
 }

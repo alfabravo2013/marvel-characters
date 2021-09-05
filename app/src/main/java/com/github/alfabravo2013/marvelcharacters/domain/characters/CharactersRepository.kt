@@ -2,6 +2,7 @@ package com.github.alfabravo2013.marvelcharacters.domain.characters
 
 import com.github.alfabravo2013.marvelcharacters.domain.filters.Filters
 import com.github.alfabravo2013.marvelcharacters.domain.filters.applyFilters
+import com.github.alfabravo2013.marvelcharacters.mappers.toCharacterItem
 import com.github.alfabravo2013.marvelcharacters.mappers.toCharacterItemPage
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
 
@@ -32,4 +33,12 @@ class CharactersRepository(
             .getCurrentPages()
             .applyFilters(filters)
             .toCharacterItemPage()
+
+    suspend fun getBookmarked(): CharactersItemPage {
+        return CharactersItemPage(
+            prevOffset = null,
+            nextOffset = null,
+            characters = localDataSource.getBookmarked().map { it.toCharacterItem() }
+        )
+    }
 }

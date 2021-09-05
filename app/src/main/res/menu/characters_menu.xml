@@ -32,4 +32,11 @@
         android:checked="false"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_filter_favotites"
+        android:title="@string/filter_favorites"
+        android:checkable="true"
+        android:checked="false"
+        app:showAsAction="never"/>
+
 </menu>

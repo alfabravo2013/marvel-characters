@@ -4,6 +4,6 @@ data class CharactersScreenState(
     val uniqueNamesFilterOn: Boolean = false,
     val hasDescriptionFilterOn: Boolean = false,
     val hasImageFilterOn: Boolean = false,
+    val favoritesFilterOn: Boolean = false,
     val searchQuery: String = "",
-    val scrollPosition: Int = 0
 )
