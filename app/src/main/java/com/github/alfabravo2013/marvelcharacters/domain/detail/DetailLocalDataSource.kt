@@ -1,9 +1,9 @@
 package com.github.alfabravo2013.marvelcharacters.domain.detail
 
-import com.github.alfabravo2013.marvelcharacters.localstorage.LocalStorage
-import com.github.alfabravo2013.marvelcharacters.localstorage.MarvelCharacterEntity
+import com.github.alfabravo2013.marvelcharacters.localstorage.CharactersDao
+import com.github.alfabravo2013.marvelcharacters.localstorage.entities.MarvelCharacterEntity
 
-class DetailLocalDataSource(private val localStorage: LocalStorage) {
+class DetailLocalDataSource(private val charactersDao: CharactersDao) {
     private var currentMarvelCharacter: MarvelCharacterEntity? = null
 
     fun getCurrentMarvelCharacter(): MarvelCharacterEntity {
@@ -14,13 +14,13 @@ class DetailLocalDataSource(private val localStorage: LocalStorage) {
         currentMarvelCharacter = character
     }
 
-    fun addBookmark() {
-        localStorage.addBookmark(getCurrentMarvelCharacter())
+    suspend fun addBookmark() {
+        charactersDao.insert(getCurrentMarvelCharacter().copy(bookmarked = true))
     }
 
-    fun removeBookmark() {
-        localStorage.removeBookmarkById(getCurrentMarvelCharacter().id)
+    suspend fun removeBookmark() {
+        charactersDao.deleteById(getCurrentMarvelCharacter().id)
     }
 
-    fun isBookmarked(id: Int): Boolean = localStorage.isBookmarked(id)
+    suspend fun isBookmarked(id: Int): Boolean = charactersDao.findBookmarkedById(id) != null
 }

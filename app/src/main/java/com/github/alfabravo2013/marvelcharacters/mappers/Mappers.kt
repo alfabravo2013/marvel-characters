@@ -1,7 +1,7 @@
 package com.github.alfabravo2013.marvelcharacters.mappers
 
 import com.github.alfabravo2013.marvelcharacters.domain.characters.models.MarvelCharacterPage
-import com.github.alfabravo2013.marvelcharacters.localstorage.MarvelCharacterEntity
+import com.github.alfabravo2013.marvelcharacters.localstorage.entities.MarvelCharacterEntity
 import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItemPage
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.CharactersItem

@@ -34,7 +34,7 @@ class CharactersRepository(
             .applyFilters(filters)
             .toCharacterItemPage()
 
-    fun getBookmarked(): CharactersItemPage {
+    suspend fun getBookmarked(): CharactersItemPage {
         return CharactersItemPage(
             prevOffset = null,
             nextOffset = null,

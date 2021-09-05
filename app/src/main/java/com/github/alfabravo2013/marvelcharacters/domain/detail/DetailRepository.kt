@@ -16,15 +16,15 @@ class DetailRepository(
         return detailLocalDataSource.getCurrentMarvelCharacter().toDetail()
     }
 
-    fun addBookmark() {
+    suspend fun addBookmark() {
         detailLocalDataSource.addBookmark()
     }
 
-    fun removeBookmark() {
+    suspend fun removeBookmark() {
         detailLocalDataSource.removeBookmark()
     }
 
-    fun isBookmarked(): Boolean {
+    suspend fun isBookmarked(): Boolean {
         val currentCharacterId = detailLocalDataSource.getCurrentMarvelCharacter().id
         return detailLocalDataSource.isBookmarked(currentCharacterId)
     }

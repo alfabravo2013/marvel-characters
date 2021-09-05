@@ -71,7 +71,10 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         _screenState.value = _screenState.value?.copy(favoritesFilterOn = isChecked)
 
         if (isChecked) {
-            _onEvent.value = OnEvent.SubmitPage(charactersUseCase.getBookmarked())
+            viewModelScope.launch {
+                val bookmarked = withContext(Dispatchers.IO) { charactersUseCase.getBookmarked() }
+                _onEvent.value = OnEvent.SubmitPage(bookmarked)
+            }
         } else {
             getCharactersPage(PAGE.CURRENT)
         }

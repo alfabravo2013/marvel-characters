@@ -38,7 +38,7 @@ class CharactersUseCase(private val charactersRepository: CharactersRepository) 
         return page
     }
 
-    fun getBookmarked() = charactersRepository.getBookmarked()
+    suspend fun getBookmarked() = charactersRepository.getBookmarked()
 
     suspend fun getPrevPage(): CharactersItemPage {
         charactersRepository.requestPrevPage(DEFAULT_PAGE_SIZE)

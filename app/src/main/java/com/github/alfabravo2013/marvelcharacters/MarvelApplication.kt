@@ -4,6 +4,7 @@ import android.app.Application
 import com.github.alfabravo2013.marvelcharacters.di.charactersModule
 import com.github.alfabravo2013.marvelcharacters.di.detailModule
 import com.github.alfabravo2013.marvelcharacters.di.marvelApiModule
+import com.github.alfabravo2013.marvelcharacters.di.roomModule
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -16,7 +17,7 @@ class MarvelApplication : Application() {
 
         startKoin {
             androidContext(this@MarvelApplication)
-            modules(listOf(charactersModule, marvelApiModule, detailModule))
+            modules(listOf(charactersModule, marvelApiModule, detailModule, roomModule))
         }
     }
 }
