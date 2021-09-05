@@ -26,4 +26,5 @@
 
 <!--    Stub message -->
     <string name="not_implemented">This feature is not implemented yet</string>
+    <string name="filter_favorites">Favorites</string>
 </resources>

@@ -66,6 +66,17 @@ class CharactersViewModel(private val charactersUseCase: CharactersUseCase) : Vi
         getCharactersPage(PAGE.FIRST)
     }
 
+    fun onToggleFavoritesFilter() {
+        val isChecked = _screenState.value?.favoritesFilterOn?.not() ?: true
+        _screenState.value = _screenState.value?.copy(favoritesFilterOn = isChecked)
+
+        if (isChecked) {
+            _onEvent.value = OnEvent.SubmitPage(charactersUseCase.getBookmarked())
+        } else {
+            getCharactersPage(PAGE.CURRENT)
+        }
+    }
+
     fun getCharactersPage(requestedPage: PAGE) = viewModelScope.launch {
         if (isLoading) {
             return@launch

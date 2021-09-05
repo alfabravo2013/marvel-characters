@@ -73,7 +73,8 @@ class CharactersFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.characters_menu, menu)
         setupMenuStateObserver(menu)
-        setupSearchView(menu)
+        setupSearchItem(menu)
+        setupSearchQuery(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -88,6 +89,10 @@ class CharactersFragment : Fragment() {
             }
             R.id.action_filter_names -> {
                 viewModel.onToggleUniqueNamesFilter()
+                return true
+            }
+            R.id.action_filter_favotites -> {
+                viewModel.onToggleFavoritesFilter()
                 return true
             }
             else -> false
@@ -110,14 +115,10 @@ class CharactersFragment : Fragment() {
             menu.findItem(R.id.action_filter_images).isChecked = state.hasImageFilterOn
             menu.findItem(R.id.action_filter_descriptions).isChecked = state.hasDescriptionFilterOn
             menu.findItem(R.id.action_filter_names).isChecked = state.uniqueNamesFilterOn
+            menu.findItem(R.id.action_filter_favotites).isChecked = state.favoritesFilterOn
         }
 
         viewModel.screenState.observe(viewLifecycleOwner, screenStateObserver)
-    }
-
-    private fun setupSearchView(menu: Menu) {
-        setupSearchItem(menu)
-        setupSearchQuery(menu)
     }
 
     private fun setupSearchItem(menu: Menu) {
@@ -143,7 +144,8 @@ class CharactersFragment : Fragment() {
 
         if (queryText.isNotEmpty()) {
             searchItem.expandActionView()
-            searchView.setQuery(queryText, false)
+            searchView.setQuery(queryText, false) // FIXME: 05.09.2021 this makes keyboard pop up, clearing focus still makes keyboard flash
+            searchView.clearFocus()
         }
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {

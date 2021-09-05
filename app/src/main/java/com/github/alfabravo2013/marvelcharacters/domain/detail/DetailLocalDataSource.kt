@@ -1,17 +1,26 @@
 package com.github.alfabravo2013.marvelcharacters.domain.detail
 
-import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
+import com.github.alfabravo2013.marvelcharacters.localstorage.LocalStorage
+import com.github.alfabravo2013.marvelcharacters.localstorage.MarvelCharacterEntity
 
-class DetailLocalDataSource {
-    private val bookmarked = mutableMapOf<Int, MarvelCharacter>()
+class DetailLocalDataSource(private val localStorage: LocalStorage) {
+    private var currentMarvelCharacter: MarvelCharacterEntity? = null
 
-    fun addBookmark(marvelCharacter: MarvelCharacter) {
-        bookmarked[marvelCharacter.id] = marvelCharacter
+    fun getCurrentMarvelCharacter(): MarvelCharacterEntity {
+        return currentMarvelCharacter ?: error("No current MarvelCharacter available")
     }
 
-    fun removeBookmark(marvelCharacter: MarvelCharacter) {
-        bookmarked.remove(marvelCharacter.id)
+    fun setCurrentMarvelCharacter(character: MarvelCharacterEntity) {
+        currentMarvelCharacter = character
     }
 
-    fun isBookmarked(id: Int): Boolean = bookmarked.containsKey(id)
+    fun addBookmark() {
+        localStorage.addBookmark(getCurrentMarvelCharacter())
+    }
+
+    fun removeBookmark() {
+        localStorage.removeBookmarkById(getCurrentMarvelCharacter().id)
+    }
+
+    fun isBookmarked(id: Int): Boolean = localStorage.isBookmarked(id)
 }

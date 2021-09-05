@@ -1,6 +1,7 @@
 package com.github.alfabravo2013.marvelcharacters.domain.detail
 
 import com.github.alfabravo2013.marvelcharacters.mappers.toDetail
+import com.github.alfabravo2013.marvelcharacters.mappers.toEntity
 import com.github.alfabravo2013.marvelcharacters.presentation.characters.model.Detail
 
 class DetailRepository(
@@ -10,19 +11,21 @@ class DetailRepository(
 
     suspend fun getCharacterById(characterId: Int): Detail {
         val isBookmarked = detailLocalDataSource.isBookmarked(characterId)
-        return detailRemoteDataSource.getCharacterById(characterId).toDetail(isBookmarked)
+        val entity = detailRemoteDataSource.getCharacterById(characterId).toEntity(isBookmarked)
+        detailLocalDataSource.setCurrentMarvelCharacter(entity)
+        return detailLocalDataSource.getCurrentMarvelCharacter().toDetail()
     }
 
     fun addBookmark() {
-        detailLocalDataSource.addBookmark(detailRemoteDataSource.getCurrentMarvelCharacter())
+        detailLocalDataSource.addBookmark()
     }
 
     fun removeBookmark() {
-        detailLocalDataSource.removeBookmark(detailRemoteDataSource.getCurrentMarvelCharacter())
+        detailLocalDataSource.removeBookmark()
     }
 
     fun isBookmarked(): Boolean {
-        val currentCharacterId = detailRemoteDataSource.getCurrentMarvelCharacter().id
+        val currentCharacterId = detailLocalDataSource.getCurrentMarvelCharacter().id
         return detailLocalDataSource.isBookmarked(currentCharacterId)
     }
 }

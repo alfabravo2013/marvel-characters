@@ -1,11 +1,13 @@
 package com.github.alfabravo2013.marvelcharacters.domain.characters
 
 import com.github.alfabravo2013.marvelcharacters.domain.characters.models.MarvelCharacterPage
+import com.github.alfabravo2013.marvelcharacters.localstorage.LocalStorage
+import com.github.alfabravo2013.marvelcharacters.localstorage.MarvelCharacterEntity
 import com.github.alfabravo2013.marvelcharacters.networking.model.MarvelCharacter
 import kotlin.math.max
 import kotlin.math.min
 
-class CharactersLocalDataSource {
+class CharactersLocalDataSource(private val localStorage: LocalStorage) {
     private var minPrevOffset: Int? = 0
     private var maxNextOffset: Int? = 0
 
@@ -44,4 +46,6 @@ class CharactersLocalDataSource {
         minPrevOffset = 0
         maxNextOffset = 0
     }
+
+    fun getBookmarked(): List<MarvelCharacterEntity> = localStorage.getBookmarked()
 }
